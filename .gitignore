@@ -1,0 +1,30 @@
+# ALLOWLIST: everything is ignored unless listed below. Patient data (raw sources, private/,
+# filtered output, analyses) must never enter git, and a new data folder must be ignored the
+# moment it appears. Add a line here only for code, config or docs.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/LICENSE
+!/.claude/
+!/CLAUDE.md
+!/CHANGELOG.md
+!/requirements.txt
+!/pyproject.toml
+!/config/
+!/pipeline/
+!/tests/
+!/reports/
+!/docs/
+!/examples/
+/examples/out/
+
+# Per-installation config: source names and allowlist words can reveal where a patient was treated.
+/config/local.toml
+/config/*.local.*
+/.claude/settings.local.json
+
+__pycache__/
+node_modules/
+*.pyc
+.pytest_cache/

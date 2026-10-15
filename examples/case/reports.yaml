@@ -1,0 +1,76 @@
+# EXAMPLE CASE (fictional). Content for the standalone reports.
+
+treatments_table:
+  title: "Cancer treatments (example)"
+  phases:   # [title, subtitle, rows]; row: [line, drug, dose, class, prescriber, practice, start, stop, serious AEs (HTML), why stopped (HTML)]
+    - - "Early breast cancer"
+      - "2015 – 2021"
+      - - ["", "Doxorubicin + cyclophosphamide", "every 2 weeks ×4", "Chemotherapy", "Dr. Maya Lindqvist", "Example Cancer Center", "6/2015", "8/2015", "", "Completed"]
+        - ["", "+ paclitaxel", "weekly ×12", "Chemotherapy", "Dr. Maya Lindqvist", "Example Cancer Center", "8/2015", "11/2015", "", "Completed"]
+        - ["", "Tamoxifen", "20 mg daily", "Endocrine", "Dr. Maya Lindqvist", "Example Cancer Center", "1/2016", "2/2018", "", "Hot flashes; switched"]
+        - ["", "Letrozole", "2.5 mg daily", "Aromatase inhibitor", "Dr. Maya Lindqvist", "Example Cancer Center", "2/2018", "2/2021", "", "Bone recurrence"]
+    - - "Metastatic"
+      - "2021 – present"
+      - - ["1", "Letrozole", "2.5 mg daily", "Aromatase inhibitor", "Dr. Maya Lindqvist", "Example Cancer Center", "3/2021", "6/2023", "", "Progression (liver)"]
+        - ["1", "+ palbociclib", "125 mg, 3 weeks on / 1 off", "CDK4/6 inhibitor", "Dr. Maya Lindqvist", "Example Cancer Center", "3/2021", "6/2023", "Neutropenia (dose reduced)", "Progression (liver)"]
+        - ["2", "Fulvestrant", "500 mg monthly", "SERD", "Dr. Maya Lindqvist", "Example Cancer Center", "6/2023", "5/2024", "", "Progression"]
+        - ["2", "+ alpelisib", "300 mg daily", "PI3K inhibitor", "Dr. Maya Lindqvist", "Example Cancer Center", "6/2023", "5/2024", "<b>Hyperglycemia, grade 3</b>", "Progression"]
+        - ["3", "Capecitabine", "1000 mg/m² twice daily, 2 weeks on / 1 off", "Chemotherapy", "Dr. Owen Tremblay", "Example Cancer Center", "6/2024", "9/2025", "Hand-foot syndrome, grade 2", "Progression (liver)"]
+        - ["4", "Sacituzumab govitecan", "10 mg/kg days 1 and 8", "Antibody–drug conjugate", "Dr. Owen Tremblay", "Example Cancer Center", "10/2025", "ongoing", "<b>Neutropenia, grade 3</b>", ""]
+  radiation:   # [site, dose, radiation oncologist, practice, dates, serious AEs]
+    - ["Left breast", "50 Gy / 25", "Dr. Priya Raman", "Example Radiation Center", "12/2015 – 1/2016", ""]
+    - ["T10 spine", "20 Gy / 5", "Dr. Priya Raman", "Example Radiation Center", "3/2021", ""]
+
+questions:     # each item: [topic, what the records show, question for the care team]
+  disagree:
+    - ["Tumor size at surgery", "The pathology report says 2.1 cm; a later visit note says 2.4 cm.", "Which is correct?"]
+  gaps:
+    - ["Germline testing", "No germline genetic test result is in the records.", "Was germline testing done, and where is the report?"]
+    - ["Echocardiogram", "Doxorubicin was given in 2015; no echocardiogram report is in the records.", "Was a baseline echo done?"]
+  settled:
+    - ["PIK3CA test", "Liquid biopsy 5/2023 found PIK3CA H1047R (confirmed by the oncologist)."]
+  settled_title: "C. Already settled"
+
+emergency:
+  fill_pdf:      # [label, value]; an empty value leaves a line to fill in by hand
+    - ["Name", ""]
+    - ["Date of birth", ""]
+    - ["Emergency contact", ""]
+    - ["Blood type", "O positive"]
+    - ["Allergies", "Sulfa (rash)"]
+    - ["Code status", ""]
+  fill_docx:     # rows of the Word version's top table: [label, value, label, value]
+    - ["Name", "", "Date of birth", ""]
+    - ["Emergency contact", "", "Phone", ""]
+    - ["Blood type", "O positive", "Allergies", "Sulfa (rash)"]
+    - ["Code status", "", "Preferred hospital", ""]
+  diagnosis_html: "<b>Metastatic HR+/HER2− breast cancer</b> (bone and liver), on sacituzumab govitecan since 10/2025."
+  diagnosis_runs:   # the same, as Word runs: [text, bold, size in half-points or 0]
+    - ["Metastatic HR+/HER2− breast cancer", true, 22]
+    - [" (bone and liver), on sacituzumab govitecan since 10/2025.", false, 0]
+  highlight: 2      # the first N risks are shown in the warning color
+  risks:
+    - ["Neutropenia risk", "Chemotherapy-type drug every week: a fever of 100.4 °F (38 °C) or more needs same-day evaluation."]
+    - ["Diarrhea", "Can be severe on sacituzumab; watch for dehydration."]
+    - ["Bone metastases", "Spine (T10) and pelvis: take care with transfers."]
+    - ["On denosumab", "Monthly; avoid unplanned dental surgery."]
+  extra_labs:       # rows added after any blood counts found in the notes: [test, value, date]
+    - ["CA 27-29", "47 U/mL", "9/15/2026"]
+  past: "Lumpectomy, chemotherapy and radiation (2015); tamoxifen then letrozole; bone recurrence 2021; then letrozole + palbociclib, fulvestrant + alpelisib, capecitabine."
+  meds_note: "From the medication list of 9/2026."
+  meds_note_docx: "From the medication list of 9/2026. Add changes below."
+  meds:             # [medicine, dose / how, for, prescriber]
+    - ["Sacituzumab govitecan", "IV days 1 and 8 of 21", "Cancer", "Dr. Owen Tremblay"]
+    - ["Denosumab", "120 mg monthly injection", "Bone metastases", "Dr. Owen Tremblay"]
+    - ["Loperamide", "as needed", "Diarrhea", "Dr. Owen Tremblay"]
+    - ["Ondansetron", "8 mg as needed", "Nausea", "Dr. Owen Tremblay"]
+  team:             # [role, clinician, practice]
+    - ["Oncologist", "Dr. Owen Tremblay", "Example Cancer Center"]
+    - ["Radiation oncologist", "Dr. Priya Raman", "Example Radiation Center"]
+  vaccines:
+    - ["Influenza", "9/2026"]
+  vaccines_title: "Recent vaccines"
+  hospitals_label: "Prior admissions:"
+  hospitals: "Example General Hospital (2/2025)."
+  foot: "Fictional example; every name and value is invented."
+  creator: "Example family"

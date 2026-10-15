@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./Sources/**)",
+      "Edit(./Sources/**)",
+      "Write(./Sources/**)",
+      "Read(./private/**)",
+      "Edit(./private/**)",
+      "Write(./private/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|Grep|Glob|Read|Edit|Write|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.sh\"", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

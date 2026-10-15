@@ -1,0 +1,46 @@
+# EXAMPLE CASE (fictional). Treatments and events: the facts the timelines and tables are drawn from.
+
+therapy_groups:          # named groups of treatment bars; charts place each group in a lane
+  systemic:
+    - {cls: chemo, short: AC-T, label: "AC → paclitaxel", start: 2015-06-01, end: 2015-11-20, note: "Adjuvant chemotherapy after lumpectomy."}
+    - {cls: endo, short: TAM, label: Tamoxifen, start: 2016-01-10, end: 2018-02-01, note: "Adjuvant; switched for hot flashes."}
+    - {cls: endo, short: LET, label: Letrozole, start: 2018-02-01, end: 2021-02-20, note: "Adjuvant, then stopped at the bone recurrence."}
+    - {cls: endo, short: LET+PAL, label: "Letrozole + palbociclib", start: 2021-03-15, end: 2023-06-01, note: "First line for bone metastases."}
+    - {cls: endo, short: FUL+ALP, label: "Fulvestrant + alpelisib", start: 2023-06-20, end: 2024-05-20, note: "PIK3CA mutation found on liquid biopsy."}
+    - {cls: chemo, short: CAPE, label: Capecitabine, start: 2024-06-03, end: 2025-09-10, note: "Hand-foot syndrome managed with a dose reduction."}
+    - {cls: adc, short: SG, label: "Sacituzumab govitecan", start: 2025-10-06, end: "@today", ongoing: true, note: "Current."}
+  bone:
+    - {cls: bone, label: Denosumab, start: 2021-03-15, end: "@today", ongoing: true,
+       holds: [[2024-01-08, 2024-03-04, "Held for a dental extraction"]], note: "Monthly."}
+  radiation:
+    - {cls: rt, label: "Whole breast", start: 2015-12-07, end: 2016-01-08, note: "Adjuvant, after chemotherapy."}
+    - {cls: rt, label: "T10 spine", start: 2021-03-01, end: 2021-03-05, note: "Palliative, for pain."}
+
+systemic_group: systemic        # the group whose bars count as "on therapy" in tooltips and tables
+table_groups: [systemic, bone, radiation]   # groups listed in the treatments table, in order
+
+early_events:                   # before metastatic disease
+  - {date: 2015-04-14, kind: img, text: "Screening mammogram: left breast mass."}
+  - {date: 2015-05-06, kind: surgery, text: "Left lumpectomy and sentinel node biopsy: 2.1 cm IDC, ER+/PR+/HER2−, 1/3 nodes."}
+
+events:                         # kind: surgery, reduction, ed, hosp, proc or img; hosp/ed may give stay: [from, to]
+  - {date: 2021-02-24, kind: proc, text: "CT-guided biopsy of a T10 lesion: metastatic breast cancer, ER+/HER2−."}
+  - {date: 2023-11-02, kind: ed, text: "ED visit for hyperglycemia on alpelisib; treated and released."}
+  - {date: 2024-01-15, kind: proc, text: "Dental extraction (denosumab held)."}
+  - {date: 2025-02-11, kind: hosp, stay: [2025-02-11, 2025-02-14], text: "Admitted for dehydration and diarrhea."}
+
+imaging:                        # [date, reading, finding]; reading: tri-up = progression, tri-down = response, circle-open = stable
+  - [2021-02-18, tri-up, "PET/CT: new T10 and right iliac bone lesions."]
+  - [2021-09-14, tri-down, "Bone scan: lesions less active."]
+  - [2022-08-30, circle-open, "CT: stable bone disease, no visceral disease."]
+  - [2023-05-22, tri-up, "CT: new liver lesions (2), largest 1.4 cm."]
+  - [2023-12-05, tri-down, "CT: liver lesions smaller."]
+  - [2024-05-14, tri-up, "CT: liver lesions larger, new lung nodule."]
+  - [2025-08-26, tri-up, "CT: liver progression."]
+  - [2026-01-12, tri-down, "CT: partial response in the liver."]
+  - [2026-08-25, circle-open, "CT: stable."]
+
+adverse_events:                 # [date, approximate?, event]
+  - [2023-10-30, false, "Hyperglycemia (grade 3) on alpelisib."]
+  - [2024-11-05, true, "Hand-foot syndrome (grade 2) on capecitabine."]
+  - [2025-11-20, false, "Neutropenia (grade 3) on sacituzumab; growth factor added."]

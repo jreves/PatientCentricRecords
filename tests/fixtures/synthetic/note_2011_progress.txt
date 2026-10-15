@@ -1,0 +1,14 @@
+PATIENT: THORNBURY, MARGARET A        DOB: 04/12/1961      MRN: 00473921
+Lakeside Oncology - Fairview
+2200 Sunrise Rd, Fairview TX 78990   Phone (555) 555-0144
+
+Date of Service: 03/14/2011
+Provider: Rajesh Kulkarni, MD
+
+PROGRESS NOTE
+Ms. Thornbury is a 49 yo woman with ER+/PR+/HER2- IDC of the left breast dx 2006, s/p lumpectomy and AC-T.
+Now with biopsy-proven liver mets. Started letrozole + palbociclib per NCCN. CA 27-29 was 88.
+Her husband Dale accompanies her. Discussed with Dr. Chen (radiology).
+Follow up with Kulkarni in 4 weeks. Herceptin not indicated (HER2 negative).
+
+Electronically signed by: Rajesh Kulkarni, MD on 03/15/2011

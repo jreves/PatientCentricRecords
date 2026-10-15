@@ -1,0 +1,11 @@
+
+@page { size: Letter landscape; margin: 10mm 11mm 11mm; }
+.print .fig-page { break-before: page; }
+.print .fig-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8mm; margin-bottom: 1.5mm; }
+.print .fig-head h2 { border: 0; margin: 0; padding: 0; }
+.print .fig-head .how { font-size: 8.5pt; color: var(--text-secondary); max-width: 120mm; text-align: right; }
+.print table.key { font-size: 8.3pt; margin-top: 2mm; } .print table.key td, .print table.key th { padding: 0.9mm 1.4mm; }
+.print table.key td.num { font-weight: 700; white-space: nowrap; width: 7mm; }
+.print table.key .ctx { color: var(--text-secondary); font-size: 7.8pt; }
+.print .foot { font-size: 8pt; color: var(--text-muted); margin-top: 3mm; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; font-size: 8.9pt; line-height: 1.3; } .print .cols li { margin-bottom: 1mm; } .print .cols h2 { margin-top: 3mm; } .cols > div > h2:first-child { margin-top: 2mm; }

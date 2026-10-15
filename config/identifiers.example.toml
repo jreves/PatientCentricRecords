@@ -1,0 +1,19 @@
+# Template for private/identifiers.toml (run `python -m pipeline init` to copy it).
+# The copy in private/ holds REAL identifiers. It is git-ignored and Claude must
+# never read it. Everything listed is redacted wherever it appears, in any case.
+
+[patient]
+names = []       # full names, incl. maiden/married: ["Jane Ann Doe", "Jane Smith"]
+nicknames = []   # single-word names she goes by: ["Janie"]
+dob = ""         # "YYYY-MM-DD"; all common spellings of it are generated
+ids = []         # MRNs, account numbers, insurance member IDs
+phones = []      # any formatting; matched digit-by-digit
+emails = []
+addresses = []   # "123 Main St, Springfield, IL 62701" (each comma part is also redacted)
+
+[people]
+# Family members, caregivers, other contacts named in the notes.
+names = []       # ["John Doe", "Mary Doe"]
+
+[redact]
+terms = []       # anything else to always redact: employer, street names, etc.

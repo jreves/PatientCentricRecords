@@ -1,0 +1,15 @@
+@page { size: Letter; margin: 13mm 12mm 14mm; }
+.viz-root.print { background: #fff; padding: 0; min-height: 0; font-size: 10.2pt; }
+.print .wrap { max-width: none; }
+.print h1 { font-size: 21pt; margin: 0 0 2mm; }
+.print h2 { font-size: 13.5pt; margin: 5mm 0 1.6mm; border-bottom: 1px solid var(--grid); padding-bottom: 1mm; break-after: avoid; }
+.print h3 { font-size: 11pt; margin: 4mm 0 1.5mm; break-after: avoid; }
+.print p, .print li { margin: 0 0 1.3mm; } .print ul { margin: 0 0 1.4mm; padding-left: 5mm; }
+.print table { font-size: 8.6pt; background: #fff; break-inside: auto; } .print tr { break-inside: avoid; }
+.print th, .print td { padding: 1.2mm 1.6mm; }
+.print .card { padding: 2mm; border-radius: 6px; break-inside: avoid; }
+.print .chart svg { max-width: 100%; height: auto; }
+.print .legend { font-size: 8pt; gap: 1mm 4mm; } .print .controls { margin-bottom: 1mm; }
+.fig { break-inside: avoid; margin: 3mm 0 4mm; } .fig .cap { font-size: 8.8pt; color: var(--text-secondary); margin-top: 1.5mm; }
+.box { border: 1px solid var(--grid); border-radius: 6px; padding: 3mm 4mm; background: #fafaf8; margin: 3mm 0; }
+.muted { color: var(--text-secondary); } .pb { break-before: page; }

@@ -1,0 +1,66 @@
+# Shared pipeline configuration (committed). Nothing in this file may identify a patient.
+# Each installation puts its own sources and tuning in config/local.toml (git-ignored), which is
+# merged over this file: its [[sources]] replace the list below, its allowlist terms and
+# no_bare_match are added to the ones here, and any other key overrides the value here.
+# Known identifiers (names, DOB, record numbers) go in private/identifiers.toml, never here.
+
+[[sources]]
+# Each source is a directory of raw documents (.pdf, .txt, .docx, .xlsx, C-CDA .xml) under Sources/.
+# `name` is recorded in each output note. Add `ocr = true` for scanned PDFs (needs Tesseract).
+name = "clinical-notes"
+path = "Sources/clinical-notes"
+
+[dedup]
+# Content-level duplicates (same episode as XML and PDF, or re-exported). A document is dropped
+# when its words are >= min_containment inside a comparable-size (>= min_size_ratio) document with
+# the same date; if either date is unknown the bar is strict_containment. XML is kept over PDF.
+min_containment = 0.85
+strict_containment = 0.95
+min_size_ratio = 0.5
+# A small document >= quote_containment inside a larger one dated 0..quote_window_days later is
+# recorded as quoted there (kept, cross-referenced).
+quote_containment = 0.9
+quote_window_days = 60
+quote_max_words = 1500
+
+[ocr]
+# Local Tesseract, only for sources with `ocr = true`. Found on PATH (or, on Windows, in its default
+# install folder); set `tesseract = "/path/to/tesseract"` in config/local.toml otherwise.
+dpi = 300
+lang = "eng"
+
+[output]
+dir = "filtered"
+
+[llm]
+# Local-only name/organization detection via Ollama. Never point `url` at a remote host:
+# the raw text is sent to it. `python -m pipeline doctor` checks Ollama and suggests a model.
+enabled = true
+url = "http://localhost:11434"
+model = "qwen3:14b"
+think = false
+num_ctx = 8192
+timeout_s = 900
+max_chunk_chars = 3500
+
+[policy]
+# Clinical dates are kept: the chronology and treatment-era reasoning depend on them.
+# Date of birth is always redacted, but the patient's age on each note's date is kept.
+dates = "keep"
+# Clinician and facility names are not patient information and are kept, so questions like
+# "what did Dr. X prescribe?" work. Family and contacts are always redacted.
+redact_facilities = false  # true: hospitals/practices -> [FACILITY-nn]
+redact_clinicians = false  # true: clinician names -> [CLINICIAN-nn]
+# Scanned pages with no text layer (and no OCR): "mark" keeps a placeholder, "drop" leaves them out.
+textless_pages = "mark"
+
+[allowlist]
+# False positives: surfaces the LLM/propagation must never redact (drug brand names, trial
+# names, eponyms, lab and device names...). Case-insensitive, exact.
+terms = [
+  "MDT",           # time zone ("AM MDT")
+]
+# Words that are legitimately part of someone's name but also ordinary words; they are still
+# redacted inside full names, just not when they stand alone ("Page 2 of 2", "Physical Exam",
+# "Fri Mar 22", "Specimen Number", "Will provide...").
+no_bare_match = ["Page", "Exam", "Mar", "System", "Number", "Specimen", "Central", "Will"]

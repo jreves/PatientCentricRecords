@@ -1,0 +1,7 @@
+# Same as `pip install -e ".[ocr,dev]"` (see pyproject.toml).
+pdfplumber>=0.11
+openpyxl>=3.1
+PyYAML>=6
+pytesseract>=0.3.10
+Pillow>=10
+pytest>=8

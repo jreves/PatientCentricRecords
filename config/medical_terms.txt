@@ -1,0 +1,335 @@
+# Terms that are never people's names: never redacted by the LLM layer or by name
+# propagation. One per line, case-insensitive. Add freely (no PII belongs here).
+# Seeded 2026-09-23 after the LLM tagged drug brand names as person names.
+
+# --- endocrine therapy ---
+tamoxifen
+nolvadex
+soltamox
+toremifene
+fareston
+raloxifene
+evista
+letrozole
+femara
+anastrozole
+arimidex
+exemestane
+aromasin
+fulvestrant
+faslodex
+elacestrant
+orserdu
+imlunestrant
+camizestrant
+goserelin
+zoladex
+leuprolide
+lupron
+eligard
+triptorelin
+trelstar
+megestrol
+megace
+# --- CDK4/6, PI3K/AKT/mTOR, PARP, other targeted ---
+palbociclib
+ibrance
+ribociclib
+kisqali
+kisqali femara co-pack
+abemaciclib
+verzenio
+alpelisib
+piqray
+vijoice
+inavolisib
+itovebi
+capivasertib
+truqap
+everolimus
+afinitor
+olaparib
+lynparza
+talazoparib
+talzenna
+# --- HER2-directed ---
+trastuzumab
+herceptin
+herceptin hylecta
+ogivri
+kanjinti
+trazimera
+herzuma
+ontruzant
+hercessi
+pertuzumab
+perjeta
+phesgo
+margetuximab
+margenza
+ado-trastuzumab emtansine
+t-dm1
+kadcyla
+fam-trastuzumab deruxtecan
+trastuzumab deruxtecan
+t-dxd
+enhertu
+lapatinib
+tykerb
+neratinib
+nerlynx
+tucatinib
+tukysa
+# --- ADCs, immunotherapy ---
+sacituzumab govitecan
+sacituzumab
+trodelvy
+datopotamab deruxtecan
+datopotamab
+Datopotama
+datroway
+pembrolizumab
+keytruda
+atezolizumab
+tecentriq
+# --- chemotherapy ---
+doxorubicin
+adriamycin
+liposomal doxorubicin
+doxil
+epirubicin
+ellence
+cyclophosphamide
+cytoxan
+paclitaxel
+taxol
+nab-paclitaxel
+abraxane
+docetaxel
+taxotere
+capecitabine
+xeloda
+gemcitabine
+gemzar
+vinorelbine
+navelbine
+eribulin
+halaven
+ixabepilone
+ixempra
+carboplatin
+paraplatin
+cisplatin
+platinol
+methotrexate
+fluorouracil
+5-fu
+adrucil
+etoposide
+irinotecan
+camptosar
+topotecan
+hycamtin
+# --- bone-directed ---
+zoledronic acid
+zometa
+reclast
+pamidronate
+aredia
+denosumab
+xgeva
+prolia
+# --- supportive care ---
+Lidocaine-Prilocaine Topical Cream
+Nerve Cream Topical
+Triple mix
+Maalox
+Visc Lidocaine
+Benadryl Elix
+Boost
+Diphenoxylate-Atropine Oral 2.5 mg-0.025 mg
+Elavil
+MVI
+Melatonin
+Misc
+pegfilgrastim
+neulasta
+fulphila
+udenyca
+ziextenzo
+nyvepria
+filgrastim
+neupogen
+zarxio
+nivestym
+granix
+epoetin
+procrit
+epogen
+retacrit
+darbepoetin
+aranesp
+ondansetron
+zofran
+granisetron
+sustol
+palonosetron
+aloxi
+akynzeo
+fosaprepitant
+emend
+aprepitant
+cinvanti
+olanzapine
+zyprexa
+prochlorperazine
+compazine
+metoclopramide
+reglan
+dexamethasone
+decadron
+prednisone
+methylprednisolone
+solu-medrol
+lorazepam
+ativan
+alprazolam
+xanax
+diphenhydramine
+benadryl
+famotidine
+pepcid
+pantoprazole
+protonix
+omeprazole
+prilosec
+loperamide
+imodium
+lomotil
+senna
+senokot
+miralax
+docusate
+colace
+oxycodone
+roxicodone
+oxycontin
+percocet
+hydrocodone
+norco
+vicodin
+hydromorphone
+dilaudid
+morphine
+ms contin
+fentanyl
+duragesic
+tramadol
+ultram
+gabapentin
+neurontin
+pregabalin
+lyrica
+duloxetine
+cymbalta
+venlafaxine
+effexor
+sertraline
+zoloft
+escitalopram
+lexapro
+citalopram
+celexa
+fluoxetine
+prozac
+bupropion
+wellbutrin
+mirtazapine
+remeron
+trazodone
+zolpidem
+ambien
+acetaminophen
+tylenol
+ibuprofen
+advil
+motrin
+naproxen
+aleve
+celecoxib
+celebrex
+heparin
+enoxaparin
+lovenox
+apixaban
+eliquis
+rivaroxaban
+xarelto
+warfarin
+coumadin
+levothyroxine
+synthroid
+metformin
+glucophage
+lisinopril
+losartan
+amlodipine
+norvasc
+metoprolol
+lopressor
+toprol
+atorvastatin
+lipitor
+rosuvastatin
+crestor
+simvastatin
+zocor
+furosemide
+lasix
+hydrochlorothiazide
+potassium chloride
+klor-con
+magnesium oxide
+mag-ox
+vitamin d
+calcium
+biotene
+magic mouthwash
+nystatin
+fluconazole
+diflucan
+valacyclovir
+valtrex
+acyclovir
+zovirax
+ciprofloxacin
+cipro
+levofloxacin
+levaquin
+amoxicillin
+augmentin
+azithromycin
+zithromax
+z-pak
+doxycycline
+cephalexin
+keflex
+sulfamethoxazole
+bactrim
+lidocaine
+emla
+Zosyn
+# --- tests, assays, scales often capitalized in notes ---
+oncotype
+oncotype dx
+mammaprint
+foundationone
+guardant
+guardant360
+signatera
+tempus
+caris
+ecog
+karnofsky
+recist
+PET scan

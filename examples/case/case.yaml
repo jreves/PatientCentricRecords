@@ -1,0 +1,50 @@
+# EXAMPLE CASE: an invented patient. Every name, date and value here is fictional.
+# Build it with:  python -m reports build --case examples/case --out examples/out
+# A real case lives in analysis/case/ (git-ignored) and is written from the de-identified notes in filtered/.
+# The files in this folder are merged in name order; see docs/case-file.md for every key.
+
+reports: [timelines, treatments, questions, emergency]   # which reports this case builds (default: all)
+notes_dir: notes   # this case's de-identified notes (default: the pipeline's filtered/notes)
+
+dates:
+  today: 2026-10-01            # "today" for the charts; @today elsewhere means this date
+  built: 2026-10-01            # the date printed on the reports and in their file names
+  records_through: 10/1/2026   # the latest record the case was written from
+
+patient:
+  summary: "Example patient (fictional), 58, metastatic HR+/HER2− breast cancer"
+  disclaimer: >-
+    Compiled by the family with AI tools from her medical records (through {records_through}) and family reports.
+    Informational use only; not for diagnosis or treatment decisions; may contain errors or omissions. Where it differs
+    from provider records, the provider records are authoritative.
+  disclaimer_tail: "Patient identifiers removed; clinician names retained."
+
+tumor_marker:
+  name: CA 27-29
+  unit: U/mL
+  uln: 38.6
+  values:   # [date, value]; or read them from a published spreadsheet note with `source: {glob, pattern}`
+    - [2021-03-10, 96]
+    - [2021-07-12, 61]
+    - [2022-01-18, 42]
+    - [2022-09-06, 35]
+    - [2023-04-11, 58]
+    - [2023-06-20, 88]
+    - [2023-10-02, 54]
+    - [2024-03-14, 71]
+    - [2024-05-28, 112]
+    - [2024-10-15, 63]
+    - [2025-04-22, 49]
+    - [2025-09-30, 77]
+    - [2026-01-20, 52]
+    - [2026-06-09, 44]
+    - [2026-09-15, 47]
+
+texts:   # prose fragments; {built}, {today}, {records_through} and {summary} are filled in
+  note: "Example output built from a fictional case. Dates marked ~ are approximate."
+  treatments_sub: "{summary} · every cancer treatment by phase, prepared {built}."
+  treatments_foot: "Fictional example. Doses and dates are invented."
+  questions_sub: "Items to raise with the care team, prepared {built} from the records through {records_through}."
+  questions_settled: "Resolved with the care team; kept so they are not asked again."
+  emergency_when: "Prepared {built} · records through {records_through}"
+  emergency_docx_subtitle: "Prepared {built} from the medical records through {records_through}. Fill in the blank cells."

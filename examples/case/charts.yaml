@@ -1,0 +1,65 @@
+# EXAMPLE CASE (fictional). Chart specs and the pages built around them.
+
+charts:
+  cancer:
+    type: oncology            # oncology | hospital | visits (see docs/case-file.md)
+    id: cancer
+    aria: "Cancer treatment timeline; the tables below list the same data."
+    ranges:                   # named time windows: [from, to]
+      all: [2015-01-01, 2026-12-31]
+      met: [2020-10-01, 2026-12-31]
+    defaultRange: met
+    lanes:                    # top to bottom; h = height in px
+      - {id: sys, label: "Systemic therapy", h: 58, labels: above, barH: 14}
+      - {id: ae, label: "Serious side effects", h: 40, markerTop: 12}
+      - {id: bone, label: "Bone agent", h: 34}
+      - {id: rt, label: "Radiation", h: 34}
+      - {id: hosp, label: "Procedures and\nhospital", h: 50}
+      - {id: img, label: "Imaging", h: 40}
+    cls:                      # bar classes -> color tokens from reports/templates/base.css
+      endo: --series-1
+      chemo: --series-2
+      adc: --series-3
+      bone: --series-4
+      rt: --series-5
+    bar_groups:               # therapy group -> lane
+      - {group: systemic, lane: sys}
+      - {group: bone, lane: bone}
+      - {group: radiation, lane: rt}
+    ae_lane: ae
+    events_lane: hosp
+    imaging_lane: img
+    guide_kinds: [surgery]    # event kinds drawn as dashed vertical guides
+    legend:                   # [sw, color token, label] or [shape, symbol, label]
+      - [sw, --series-1, "Endocrine / targeted"]
+      - [sw, --series-2, "Chemotherapy"]
+      - [sw, --series-3, "Antibody–drug conjugate"]
+      - [sw, --series-4, "Bone agent"]
+      - [sw, --series-5, "Radiation"]
+      - [held, "", ""]           # dashed outline: treatment held
+      - [txt, "▲", "progression"]
+      - [txt, "▼", "response"]
+
+pages:                        # interactive HTML pages
+  cancer:
+    chart: cancer
+    file: cancer_timeline.html
+    title: "Cancer treatment timeline (example)"
+    sub: "Fictional example patient. Hover a bar or marker for details."
+    ranges_ui: [[all, "2015 – present"], [met, "Metastatic 2021 – present"]]
+    tables:
+      - {title: Treatments, kind: therapies}
+      - {title: Serious side effects, kind: adverse_events}
+      - {title: "Procedures, ED and hospital", kind: events}
+      - {title: Imaging milestones, kind: imaging}
+
+chart_pdfs:                   # a printable PDF of a page's chart, every marker numbered, with its tables
+  - chart: cancer
+    range: met
+    name: cancer_timeline
+    title: "Cancer treatment timeline (example)"
+    fig_title: "Metastatic course, 2021 – present"
+    sub: "Fictional example patient."
+    how: "Bars are treatments; numbered markers are keyed below the chart."
+    bars_title: Treatments
+    tables: cancer

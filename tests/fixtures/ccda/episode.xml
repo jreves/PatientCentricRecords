@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <templateId root="2.16.840.1.113883.10.20.22.1.1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summarization of Episode Note"/>
+  <title>Inpatient Summary</title>
+  <effectiveTime value="20260927132315-0500"/>
+  <recordTarget><patientRole>
+    <id extension="00473921" root="1.2.3"/>
+    <addr><streetAddressLine>2200 Sunrise Rd</streetAddressLine><city>Fairview</city><state>TX</state><postalCode>78990</postalCode></addr>
+    <telecom value="tel:+1-555-555-0144"/>
+    <patient><name><given>Margaret</given><family>Thornbury</family></name><birthTime value="19610412"/></patient>
+  </patientRole></recordTarget>
+  <author><assignedAuthor><addr><streetAddressLine>1 Author Way</streetAddressLine></addr><assignedPerson><name>Rajesh Kulkarni</name></assignedPerson></assignedAuthor></author>
+  <custodian><assignedCustodian><representedCustodianOrganization><name>Mercy General Hospital</name>
+    <telecom value="tel:+1-555-555-9999"/></representedCustodianOrganization></assignedCustodian></custodian>
+  <participant typeCode="IND"><associatedEntity classCode="ECON"><associatedPerson><name>Dale Thornbury</name></associatedPerson></associatedEntity></participant>
+  <documentationOf><serviceEvent><effectiveTime><low value="20241118120021-0600"/><high value="20241118160600-0600"/></effectiveTime></serviceEvent></documentationOf>
+  <component><structuredBody>
+    <component><section><code code="29299-5"/><title>Reason for Visit</title><text>Upper back pain</text></section></component>
+    <component><section><code code="11369-6"/><title>Immunizations</title><text>No data available for this section</text></section></component>
+    <component><section><code code="30954-2"/><title>Results</title><text><table><thead><tr><th>Test</th><th>Result</th><th>Range</th></tr></thead>
+      <tbody><tr><td>Hemoglobin</td><td>10.2 g/dL</td><td>12.0-16.0</td></tr><tr><td>Platelets</td><td>145 K/uL</td><td>150-400</td></tr></tbody></table></text></section></component>
+    <component><section><code code="28568-4"/><title>Physician Emergency department Note</title><text><paragraph>68F with metastatic breast cancer on datopotamab presents with right upper back pain.</paragraph><paragraph>MRI thoracic spine shows an acute right rib fracture. Discharged home on hydrocodone.</paragraph></text></section></component>
+    <component><section><code code="48768-6"/><title>Insurance Providers</title><text>Member ID W123456789 Subscriber Dale Thornbury</text></section></component>
+    <component><section><code code="85847-2"/><title>Patient Care team information</title><text>Caregiver: Dale Thornbury, spouse</text></section></component>
+  </structuredBody></component>
+</ClinicalDocument>

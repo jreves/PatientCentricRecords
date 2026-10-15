@@ -1,0 +1,30 @@
+# Template for config/local.toml (`python -m pipeline init` copies it). Your copy is git-ignored.
+# It is merged over config/pipeline.toml: [[sources]] here replaces the shared list, allowlist
+# terms and no_bare_match are added to the shared ones, and any other key overrides the shared value.
+
+# One block per subfolder of Sources/. `name` is recorded in each output note.
+[[sources]]
+name = "clinical-notes"
+path = "Sources/clinical-notes"
+
+# [[sources]]
+# name = "hospital-records"
+# path = "Sources/hospital-records"     # C-CDA .xml exports are read better than PDF printouts
+
+# [[sources]]
+# name = "scanned-records"
+# path = "Sources/scanned-records"
+# ocr = true                            # scanned PDFs: needs Tesseract (see `python -m pipeline doctor`)
+
+# [llm]
+# model = "qwen3:14b"                   # `python -m pipeline doctor` suggests a model for this machine
+
+# [ocr]
+# tesseract = "/opt/homebrew/bin/tesseract"   # only if it is not found on PATH
+
+# [allowlist]
+# Words wrongly redacted as names in YOUR records (a clinic, a lab, a device maker...).
+# They can reveal where the patient is treated, which is why they live here and not in the shared file.
+# terms = ["Example Cancer Center"]
+# Name parts that are also ordinary words in your records ("Austin" in "transfer to Austin"):
+# no_bare_match = []

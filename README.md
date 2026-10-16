@@ -104,8 +104,9 @@ Then:
    until it prints `PUBLISHED` and you're satisfied. If it reports warnings, read `private/verify_report.md`, and once
    you've checked every one, run `python -m pipeline run --accept-warnings`.
 5. **Build the case file with Claude.** Open Claude Code in this folder and ask it, for example, to "read
-   `filtered/all_notes_chronological.md` and draft `analysis/case/` following `docs/case-file.md`". Check what it
-   writes against the records: you know the history better than any summary.
+   `filtered/all_notes_chronological.md` and draft `analysis/case/` following `docs/case-file.md`, citing the note
+   behind each statement in `citations.yaml`". Check what it writes against the records: you know the history better
+   than any summary.
 6. **Build the reports:** `python -m reports build`. They appear in `analysis/`.
 7. **Check the source audit** before handing the reports to a new physician. Each build ends with
    `analysis/source_audit_<date>.pdf`, listing every statement in the reports with the record note it comes from and a
@@ -142,10 +143,10 @@ python -m pipeline doctor [--bench]     # environment check; --bench scores the 
 python -m pipeline run                  # de-identify everything; publishes only if the leak check passes
 python -m pipeline run --accept-warnings  # after you have reviewed every warning
 python -m pipeline verify               # re-check the published notes (e.g. after adding identifiers)
-python -m pipeline audit                # count-only check for over-redaction (drugs taken for people)
+python -m pipeline audit                # de-identification: count-only check for over-redaction (drugs taken for people)
 python -m pipeline ids                  # count-only inventory of record numbers found
 python -m reports build [--only NAME]   # build the reports from analysis/case
-python -m reports audit [--suggest]     # source audit: every statement cited and checked; --suggest proposes citations
+python -m reports audit [--suggest]     # reports: the source audit (every statement cited and checked); --suggest proposes citations
 python -m pytest -q                     # tests (synthetic data only)
 ```
 

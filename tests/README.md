@@ -14,5 +14,6 @@ have the same *shape* as the problem.
 | `test_doctor.py` | model choice by GPU memory, the localhost-only rule for the model URL |
 | `test_guard.py` | the Claude Code privacy hook |
 | `test_reports.py` | the report engine on the example case (HTML, no browser needed) |
+| `test_audit.py` | the source audit: date and dose matching, quote checks, statuses, "not in the records" searches, suggestions |
 
 The OCR test needs Tesseract and skips without it.

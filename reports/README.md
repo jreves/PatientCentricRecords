@@ -27,3 +27,11 @@ footer, PDF printing), `renderer.js` (the swim-lane timeline renderer, inline SV
 with `PCR_BROWSER`. **The Word file** needs Node.js and `npm install` in this folder (it installs the `docx` package).
 
 Every printed page carries the case's disclaimer (`patient.disclaimer`) and "report name · page X of Y".
+
+**The source audit** (`audit.py`) runs at the end of every build (`build --no-audit` skips it), or on its own with
+`python -m reports audit`. Every statement in the case must be cited in `citations.yaml` beside the case: a published
+note and a verbatim quote, a family report, or a search showing something is absent from the records. It checks
+the quotes and every date, dose, drug and clinician locally, then has the local model (Ollama) read each statement
+against its cited passages (`--no-semantic` skips that). It writes `source_audit_<date>.pdf`. It warns; it never
+stops a build. `--suggest` proposes citations for unsourced statements (`citations.suggested.yaml`), to review
+before copying them in. See [docs/case-file.md](../docs/case-file.md).

@@ -25,6 +25,9 @@ yourself.
 - "Which notes mention the PIK3CA result, and do they agree?"
 - "The review page shows a drug name redacted as a person. Add it to the allowlist in `config/local.toml`."
 - "Rebuild the reports with today's date."
+- "For every claim you added to the case, cite the published note that says it in `analysis/case/citations.yaml`,
+  then run `python -m reports audit` and fix anything it flags."
+- "Go through the statements the source audit's local model doubted, and tell me which are real gaps."
 
 ## Things to check yourself
 
@@ -32,6 +35,9 @@ yourself.
   treatment, or merge two events.
 - The review page, `private/review/index.html`, after each run that adds records.
 - Each report, before you share it.
+- The source audit, `analysis/source_audit_<date>.pdf`, before handing the reports to a new physician: every
+  statement with the record note it comes from. A citation can still point to the wrong note, which is why the
+  local model reads each one too and the family reviews what it doubts. Approve corrections to the wording yourself.
 
 ## Your account's data settings
 

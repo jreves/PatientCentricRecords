@@ -585,3 +585,36 @@ def test_space_less_pdf_text_still_redacts_known_identifiers():
     for v in ["4/12/1961", "00473921", "2200SunriseRd"]:
         assert v in found, f"missed in glued text: {v}"
     assert not any(v in found for v in ["5/2/2024"]), "the exam date is not the DOB"
+
+
+def test_specimen_and_device_ids_in_lab_logs():
+    """Regression (2026-10-15): hospital order logs print "<test> - ID: <specimen number>", and implant records
+    "Device ID: <serial>"; both are identifiers."""
+    from pipeline import rules
+    t = ("04:56:37 Specimens CBC with Diff - ID: 23QA-118C0042 Type: Blood\n"
+         "Implant: Femoral head Device ID: 08851234567890 Lot 77Q\n"
+         "ClinVar Variation ID: 4815162")
+    got = {t[s.start:s.end] for s in rules.detect(t, rules.Denylist({})) if s.cat == "ID"}
+    assert {"23QA-118C0042", "08851234567890"} <= got
+
+
+def test_docx_footer_dates_a_medication_list(tmp_path):
+    """2026-10-16: the family's medication list carries its date in the Word footer ("Last updated ...")."""
+    import zipfile
+    from pipeline.chrono import note_date
+    from pipeline.extract import _docx_pages
+    path = tmp_path / "meds.docx"
+    _write_docx(path, ["Current medications"], [["Medicine", "Dose"], ["Letrozole", "2.5 mg daily"]])
+    W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    with zipfile.ZipFile(path, "a") as z:
+        z.writestr("word/footer1.xml", f'<?xml version="1.0"?><w:ftr {W}><w:p><w:r><w:t>Last updated October 10, 2026</w:t></w:r></w:p></w:ftr>')
+    pages = _docx_pages(path)
+    assert "Last updated October 10, 2026" in pages[-1]
+    d, basis = note_date(pages)
+    assert str(d) == "2026-10-10" and "Last updated" in basis
+
+
+def test_updated_label_dates_a_list():
+    from pipeline.chrono import note_date
+    d, basis = note_date(["Current medications\nOmeprazole 40mg\nUpdated 10/05/2026"])
+    assert str(d) == "2026-10-05" and basis == "label 'Updated'"

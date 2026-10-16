@@ -25,4 +25,4 @@ Neu # (ANC) x 10^3/uL 2.4 1.8
 HGB g/dL 11.4 11.1 (L)
 PLT x 10^3/uL 214 196
 
-Plan: proceed with cycle 12. CA 27-29 47 on 9/15/2026, stable.
+Plan: proceed with cycle 12. CA 27-29 47 U/mL on 9/15/2026, stable.

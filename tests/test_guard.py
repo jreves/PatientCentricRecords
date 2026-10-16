@@ -19,6 +19,7 @@ def bash(cmd):
     'head "private\\verify_report.md"', "grep -r Smith sources/", "cd private && ls", "python -c \"open('Sources/x.pdf')\"",
     "cat '/home/user/My Records/private/registry.json'", "cat /home/user/My\\ Records/Sources/a.pdf",
     "Get-ChildItem G:\\My Records\\Sources", "cat ../My Records/private/x",
+    "ls private | wc -l", "find Sources -type f", "du -sh private; ls", "echo $(ls Sources)", "ls 'private'",
 ])
 def test_blocks_guarded_folders(cmd):
     assert bash(cmd)
@@ -27,7 +28,8 @@ def test_blocks_guarded_folders(cmd):
 @pytest.mark.parametrize("cmd", [
     "python -m pipeline run", "ls filtered/notes | head", "cat /private/tmp/scratch.txt", "ls /private/var/folders",
     "python -c \"print(paths.private / 'x')\"", "git status --short -- pipeline config", "grep -n privacy README.md",
-    "echo open-sources",
+    "echo open-sources", "git commit -m 'Cite the sources for each claim'", "python -c \"help='propose sources for claims'\"",
+    "echo private data stays local",
 ])
 def test_allows_everything_else(cmd):
     assert not bash(cmd)

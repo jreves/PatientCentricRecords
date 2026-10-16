@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0 (continued, before the first push)
+
+- **Source audit** (`python -m reports audit`, run after every build): every statement in a case cites a published
+  note and a verbatim quote, a family report, or a records-wide search for "not in the records". The local checks
+  confirm the quote and every date, dose, drug and clinician. The local model then reads each statement fact by
+  fact. A case can mark notes as authoritative for what they cover, and record hand-review notes. The appendix PDF
+  lists every statement with its sources, worklist first.
+- **De-identification:** specimen accession numbers in lab-order logs and implant device IDs are now redacted.
+- **Word files:** headers and footers are read, and an "Updated <date>" line dates a document.
+- **Privacy hook:** a bare folder name in prose no longer trips it.
+
 ## 0.9.0 (first public release)
 
 - **De-identification pipeline** (`python -m pipeline`): runs locally. It reads PDF (text and scanned, with

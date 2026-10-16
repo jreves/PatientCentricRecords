@@ -77,6 +77,9 @@ ID_LABEL = (r"(?:ID[ \t]*#|MRN|MR[ \t]*#|MR[ \t]*No\.?|Med(?:ical)?[ \t]+Rec(?:o
             r"|Group[ \t]*(?:#|No\.?|Number)|Order[ \t]*(?:#|No\.?|Number|ID)|Accession[ \t]*(?:#|No\.?|Number)?"
             r"|Acc[ \t]*#|Specimen[ \t]*(?:#|No\.?|ID|Number)|Case[ \t]*(?:#|No\.?|Number)"
             r"|Req(?:uisition)?[ \t]*(?:#|No\.?)|Claim[ \t]*(?:#|No\.?|Number)|SSN"
+            # order logs ("CBC - ID: <specimen>") and implant records ("Device ID:", serial and lot numbers);
+            # a bare "ID:" is a label too, except a public genetic-database "Variation ID"
+            r"|Device[ \t]*(?:ID|Identifier)|UDI|Serial[ \t]*(?:#|No\.?|Number)|(?<!Variation[ \t])ID(?=[ \t]*:)"
             r"|Social[ \t]+Security(?:[ \t]+(?:Number|No\.?|#))?)")
 STREET_SUFFIX = (r"(?:St|Street|Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Ln|Lane|Way|Ct|Court|Pkwy|Parkway"
                  r"|Hwy|Highway|Cir|Circle|Pl|Place|Trl|Trail|Loop|Pike|Ter|Terrace|Sq|Square|Cv|Cove|Xing|Crossing)")

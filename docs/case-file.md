@@ -171,5 +171,38 @@ not on the visit lists; `current: [names]` from the family's current list (it wi
 - Optional `usage_years: [from, to]` and `usage_adjust: [[year, metric, delta]]`; `usage_title`.
 - Texts: `overview_sites`, `overview_lines`, `overview_usage`.
 
+## Citations and the source audit (`citations.yaml`)
+
+Before the reports go to a new physician, the family should be able to say where each statement comes from.
+`citations.yaml`, beside the case files, gives the sources for every claim:
+
+```yaml
+event/2025-02-11/hosp:
+  src:
+    - {doc: ex00000002, quote: "Admitted 2/11/2025 with dehydration"}   # a published note id and a verbatim quote
+imaging/2023-05-22:
+  src: [{doc: ex00000003, quote: "new liver lesions"}]
+  accept: {"1.4 cm": "size is in the report's table, which the extractor split"}   # a detail accepted by hand, with a reason
+emergency/vaccine/Influenza:
+  src: [{family: "the family, 9/2026"}]                              # something the records don't contain
+```
+
+The keys name the claims: `therapy/<group>/<label>/<start>`, `event/<date>/<kind>`, `imaging/<date>`, `ae/<date>`,
+`treatments/<line>/<drug>`, `pathology/<test id>`, `emergency/risk/<title>`, `chart/<chart>/visit/<date>`,
+`narrative/<first words>`, and so on. `python -m reports audit` lists every key, and `--suggest` writes
+`citations.suggested.yaml`: for each unsourced claim, the notes that contain the most of its details, and the line
+that holds them. Review those suggestions before copying them in.
+
+`python -m reports audit` runs after every build (`build --no-audit` skips it). For each claim it checks that:
+- the cited note exists and contains the quote, word for word (line breaks and spacing are ignored);
+- every **detail** of the claim is in the cited notes: each date (in any common format; `~` dates to the month),
+  amount with a unit (`125 mg`, `20 Gy`, `1.4 cm`, `85%`), drug or test name from `config/medical_terms.txt` (brand
+  and generic names count as the same; add pairs under `audit: synonyms:`), and "Dr. X" surname;
+- the **meaning** holds: the local model (Ollama, the pipeline's model or `audit: model:`) reads the claim with the
+  cited passages and answers supported / partly / not supported. `--no-semantic` skips this; results are cached.
+
+The appendix `source_audit_<built>.pdf` lists every claim with its status, its source notes and quotes, and what didn't
+check out. The worklist comes first. The audit warns; it never stops a build.
+
 When a report's section is missing, that report may fail to build. List only the reports you've written content for
 in `reports:`.

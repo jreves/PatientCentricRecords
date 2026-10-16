@@ -18,6 +18,7 @@ drugs, clinicians, prose) comes from the case file.
 | `overview` | `overview.py` | body map of disease sites, treatment-line swimmer chart, hospital use |
 | `questions` | `questions.py` | open questions and discrepancies for the care team |
 | `emergency` | `emergency.py` + `emergency_docx.js` | two-page emergency/travel summary, PDF and editable Word |
+| (after every build) | `audit.py` | the source audit: each statement in the case, its cited notes and quotes, checked locally |
 
 Shared pieces: `case.py` (loading and merging the case YAML), `common.py` (page shells, the per-page disclaimer
 footer, PDF printing), `renderer.js` (the swim-lane timeline renderer, inline SVG), `templates/` (CSS).

@@ -73,7 +73,7 @@ XML is preferred, because PDF tables scramble the word order.
    don't know), add a synthetic test case to `tests/` and fix the rule.
 3. **Over-redacted** a drug, test, lab or device? Add it to `[allowlist] terms` in `config/local.toml`. If it's
    generic (any patient would hit it), add it to `config/medical_terms.txt` instead.
-4. A word that is both part of a name and an ordinary word ("Will", "Austin") goes in `no_bare_match`. It is still
+4. A word that is both part of a name and an ordinary word ("Will", "Lincoln") goes in `no_bare_match`. It is still
    redacted inside a full name.
 5. `python -m pipeline audit` lists redacted "people" the model thinks may be drugs or tests, as counts. The words
    go to `private/audit_suspects.md` for you to confirm. Don't exempt a word only on the model's say-so.

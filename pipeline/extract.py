@@ -2,6 +2,7 @@
 import hashlib
 import logging
 import os
+import re
 from dataclasses import dataclass, field
 
 import pdfplumber
@@ -65,6 +66,13 @@ def _docx_pages(path):
     import zipfile
     with zipfile.ZipFile(path) as z:
         body = ET.fromstring(z.read("word/document.xml")).find(W + "body")
+        # Headers and footers can carry the document's date ("Last updated ..."): their text goes after the body.
+        margins = []
+        for name in sorted(n for n in z.namelist() if re.match(r"word/(header|footer)\d*\.xml$", n)):
+            for p in ET.fromstring(z.read(name)).iter(W + "p"):
+                t = _docx_text(p).strip()
+                if t and t not in margins:
+                    margins.append(t)
     pages, lines = [], []
     for block in body:
         if block.tag == W + "p":
@@ -76,7 +84,7 @@ def _docx_pages(path):
             for row in block.iter(W + "tr"):
                 cells = [" ".join(_docx_text(p) for p in tc.iter(W + "p")).strip() for tc in row.iter(W + "tc")]
                 lines.append(" | ".join(cells))
-    pages.append(lines)
+    pages.append(lines + margins)
     return [_clean("\n".join(p)) for p in pages]
 
 

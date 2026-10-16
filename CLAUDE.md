@@ -93,7 +93,13 @@ kept by default; the patient's family, contacts, IDs, phones, addresses and "Cit
 ## Reports
 
 The engine (`reports/`) holds no patient facts. Everything comes from the case file (docs/case-file.md). Write the
-case only from `filtered/`. Every printed page carries the case's disclaimer. Check the rendered PDFs visually
+case only from `filtered/`. Every printed page carries the case's disclaimer.
+
+**Source audit** (`reports/audit.py`, runs after every build): every claim in the case must be cited in
+`analysis/case/citations.yaml` (a note id + a verbatim quote, or a family report). When you add or change a claim, add
+or fix its citation from the published note that says it. Never cite a note you haven't checked contains the fact.
+Don't silence a "partial" with `accept:` unless the user agrees; prefer citing a second note. `--suggest` proposals
+are machine-picked and must be reviewed before they're adopted. Check the rendered PDFs visually
 (render pages to PNG and look) for overflow and label collisions before calling a report done.
 
 ## Working conventions

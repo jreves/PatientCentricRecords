@@ -1,0 +1,17 @@
+# EXAMPLE (fictional): citations for a few of the example's claims, to show the source audit's statuses.
+# A real case cites every claim; `python -m reports audit --suggest` proposes citations to review.
+emergency/lab/CA 27-29:
+  src:
+    - {doc: ex00000001, quote: "CA 27-29 47 U/mL on 9/15/2026, stable."}
+emergency/team/Oncologist:
+  src:
+    - {doc: ex00000001, quote: "Provider: Owen Tremblay, MD"}
+emergency/risk/Diarrhea:
+  src:
+    - {doc: ex00000001, quote: "diarrhea controlled with loperamide"}
+emergency/med/Ondansetron:          # the cited note doesn't mention ondansetron: shown as partly grounded
+  src:
+    - {doc: ex00000001, quote: "Tolerating treatment"}
+emergency/vaccine/Influenza:
+  src:
+    - {family: "the family, 9/2026"}

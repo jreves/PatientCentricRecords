@@ -16,16 +16,21 @@ import sys
 GUARDED = ("sources", "private")
 ROOT = pathlib.Path(os.environ.get("CLAUDE_PROJECT_DIR") or pathlib.Path(__file__).resolve().parent.parent.parent)
 END = r"(?=[\\/\"'`\s)*;|&,]|$)"
+# A bare folder name is a path when a separator follows, or it ends the command or an argument list
+# ("ls Sources", "cd private && ls", "$(ls private)"), not when it's a word in a sentence ("cite the sources for").
+REL_END = r"(?=[\\/*]|\s*(?:$|&&|\|\||[|;>)`\"'])|\s+-|$)"
 
 
 def patterns(root=ROOT):
     names = "|".join(GUARDED)
     # A relative path: the folder name at the start of a word, optionally after ./ (but not /private/tmp on macOS).
-    rel = rf"(?:^|[\s\"'`=(,;|&<>])(?:\.[\\/])?(?:{names}){END}"
+    rel = rf"(?:^|[\s\"'`=(,;|&<>])(?:\.[\\/])?(?:{names}){REL_END}"
     # An absolute or ../ path through this project's folder, written with either slash.
     base = re.escape(root.name).replace(r"\ ", r"(?:\\?\s)")
     via_root = rf"{base}[\\/]+(?:{names}){END}"
-    return [re.compile(rel, re.I), re.compile(via_root, re.I)]
+    # The raw-records folder as written ("grep -r x Sources other"): capitalized, it is a path, not prose.
+    exact = r"(?:^|[\s\"'`=(,;|&<>])(?:\.[\\/])?Sources(?![\w.-])"
+    return [re.compile(rel, re.I), re.compile(via_root, re.I), re.compile(exact)]
 
 
 def touches_private(text, root=ROOT):

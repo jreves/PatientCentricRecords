@@ -23,6 +23,8 @@ DATE_LABELS = [
     (r"Collection[ \t]*Date|Date[ \t]*Collected|Collected", 7),
     (r"Report[ \t]*Date|Note[ \t]*Date|Date[ \t]*of[ \t]*Note|Discharge[ \t]*Date|Date[ \t]*of[ \t]*Discharge", 6),
     (r"Received", 5),
+    # a list kept up to date by the family ("Last updated October 10, 2026", often in a Word footer)
+    (r"(?:Last[ \t]*)?(?:updated|revised|modified)(?:[ \t]*on)?", 5),
     (r"(?:Electronically[ \t]*)?Signed(?:[ \t]*(?:on|by))?", 4),
     (r"Date", 3),
 ]

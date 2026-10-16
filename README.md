@@ -15,6 +15,7 @@ assistant (Claude) help the family build reports from the de-identified notes:
 - pathology and genomic test results alongside the treatments they informed;
 - blood counts, weight and performance status, and medication timelines;
 - a list of open questions and discrepancies to raise with the care team.
+- a source audit: every statement in the reports traced to the record note it comes from.
 
 > [!IMPORTANT]
 > **Not medical advice, and not a medical device.** This is a personal record-keeping tool. Its reports are compiled
@@ -106,6 +107,10 @@ Then:
    `filtered/all_notes_chronological.md` and draft `analysis/case/` following `docs/case-file.md`". Check what it
    writes against the records: you know the history better than any summary.
 6. **Build the reports:** `python -m reports build`. They appear in `analysis/`.
+7. **Check the source audit** before handing the reports to a new physician. Each build ends with
+   `analysis/source_audit_<date>.pdf`, listing every statement in the reports with the record note it comes from and a
+   quote from that note. Software checks that the quote and every date, dose and drug in the statement are in that note,
+   and the local model reads each one as a second check. Fix or cite whatever it flags (`docs/case-file.md`).
 
 To see what the reports look like first, build the fictional example: `python -m reports build --case examples/case --out examples/out`.
 
@@ -140,6 +145,7 @@ python -m pipeline verify               # re-check the published notes (e.g. aft
 python -m pipeline audit                # count-only check for over-redaction (drugs taken for people)
 python -m pipeline ids                  # count-only inventory of record numbers found
 python -m reports build [--only NAME]   # build the reports from analysis/case
+python -m reports audit [--suggest]     # source audit: every statement cited and checked; --suggest proposes citations
 python -m pytest -q                     # tests (synthetic data only)
 ```
 

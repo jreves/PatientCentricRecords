@@ -26,5 +26,5 @@ path = "Sources/clinical-notes"
 # Words wrongly redacted as names in YOUR records (a clinic, a lab, a device maker...).
 # They can reveal where the patient is treated, which is why they live here and not in the shared file.
 # terms = ["Example Cancer Center"]
-# Name parts that are also ordinary words in your records ("Austin" in "transfer to Austin"):
+# Name parts that are also ordinary words in your records ("Lincoln" in "moved to Lincoln"):
 # no_bare_match = []

@@ -161,7 +161,12 @@ python -m pytest -q                     # tests (synthetic data only)
 ## Contributing
 
 Issues and pull requests are welcome. **Never include real patient data** in an issue, a pull request, a test or a
-screenshot: describe problems with invented examples, as the tests in `tests/` do.
+screenshot: describe problems with invented examples, as the tests in `tests/` do. The issue forms ask you to confirm
+this before you submit.
+
+If you find a **privacy problem** (identifying information reaching published output, or Claude Code able to see
+something it shouldn't), please report it privately through the repository's
+[security advisories](https://github.com/jreves/PatientCentricRecords/security/advisories/new), not in a public issue.
 
 ## License
 

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a privacy or security problem
+    url: https://github.com/jreves/PatientCentricRecords/security/advisories/new
+    about: If identifying information reaches published output, or Claude can see something it shouldn't, report it privately here rather than in a public issue.

@@ -1,0 +1,59 @@
+name: Bug report
+description: Something doesn't work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never include real patient information in an issue**, not even de-identified. That means names, dates of
+        birth, record numbers, addresses, phone numbers, note text, file names from your records, or screenshots of
+        records or reports. Issues are public and can't be fully deleted.
+
+        To show a problem, describe its *shape* with invented values. For example: "a line like
+        `Provider: Jane Smith, MD` isn't redacted when the name is split across two lines". The tests in `tests/` are
+        built the same way.
+
+        If the problem is a **privacy leak** (identifying information reaching published output), please report it
+        privately instead: see "Report a privacy or security problem" on the new-issue page.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This issue contains no real patient information, and no file names, text or screenshots from real records or reports.
+          required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - De-identification pipeline (python -m pipeline run / verify)
+        - Environment check (python -m pipeline doctor)
+        - Reports (python -m reports build)
+        - Source audit (python -m reports audit)
+        - Claude Code privacy hook
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+      description: Use invented values for anything that would come from records.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce it
+      description: Ideally with the fictional example case (examples/case) or a synthetic snippet with invented names and numbers.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        OS, Python version, GPU, Ollama version and model. The "Hardware" and "Ollama" sections of
+        `python -m pipeline doctor` are fine to paste. Leave out its "Configuration and data" section: source names
+        can identify where a patient is treated.
+      render: text

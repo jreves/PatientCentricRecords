@@ -1,0 +1,28 @@
+name: Feature request
+description: A new report, record format, check or improvement.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never include real patient information**, not even de-identified: no names, dates, record numbers,
+        note text, file names or screenshots from real records or reports. Describe what you need with invented examples.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This request contains no real patient information, and no file names, text or screenshots from real records or reports.
+          required: true
+  - type: textarea
+    id: need
+    attributes:
+      label: What would help, and for whom
+      description: For example, "a report for the radiation history", or "read lab results from another hospital's export format".
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: An invented example
+      description: What the input looks like (with made-up values), and what the output should be.

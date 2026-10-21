@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **Documentation:** a getting-started guide (Windows, macOS, Linux), a routine for new records, a guide to the source
+  audit, an architecture overview with a diagram, troubleshooting and FAQ, CONTRIBUTING and SECURITY.
+- **Example case:** now covers every report, with generated fictional notes (lab tables, vital signs, medication
+  lists, running history) and citations. The README shows screenshots from it.
+- **Fixes:**
+  - A document made only of scanned pages no longer breaks a run; the log names its source.
+  - Unreadable model answers are cached, so audits don't re-ask.
+  - The vitals subtitle no longer says "rose to a peak" when the first weight is the peak.
+
 ## 0.9.0 (continued, before the first push)
 
 - **Source audit** (`python -m reports audit`, run after every build): every statement in a case cites a published

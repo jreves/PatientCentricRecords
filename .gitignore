@@ -6,6 +6,8 @@
 !/.gitattributes
 !/README.md
 !/LICENSE
+!/CONTRIBUTING.md
+!/SECURITY.md
 !/.claude/
 !/.github/
 !/CLAUDE.md

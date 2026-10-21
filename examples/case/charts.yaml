@@ -40,6 +40,35 @@ charts:
       - [txt, "▲", "progression"]
       - [txt, "▼", "response"]
 
+  # A hospital chart: procedures, ED visits and stays from the events, with the cancer therapy for context.
+  hospital:
+    type: hospital
+    id: hosp
+    aria: "Procedures, emergency visits and hospital stays; the tables below list the same data."
+    labelWidth: 150
+    ranges: {all: [2015-01-01, 2026-12-31], recent: [2020-10-01, 2026-12-31]}
+    defaultRange: recent
+    lanes:
+      - {id: ops, label: "Surgery and\nprocedures", h: 46}
+      - {id: ed, label: ED visits, h: 40}
+      - {id: stay, label: Hospital stays, h: 34}
+      - {id: rt, label: Radiation, h: 34}
+      - {id: ctx, label: "Cancer therapy\n(context)", h: 40, labels: above, barH: 10}
+    cls: {stay: --series-1, rt: --series-5, ctx: --text-muted}
+    lane_of_kind: {surgery: ops, proc: ops, reduction: ops, ed: ed, hosp: stay}
+    stay_lane: stay
+    bar_groups:
+      - {group: radiation, lane: rt}
+      - {group: systemic, lane: ctx, cls: ctx, faint: true}
+    guide_kinds: [surgery]
+    legend:
+      - [sw, --series-1, "Hospital stay"]
+      - [sw, --series-5, "Radiation"]
+      - [sw, --text-muted, "Cancer therapy (context)"]
+      - [txt, "◆", "surgery"]
+      - [txt, "●", "procedure"]
+      - [txt, "○", "ED visit"]
+
 pages:                        # interactive HTML pages
   cancer:
     chart: cancer
@@ -52,6 +81,22 @@ pages:                        # interactive HTML pages
       - {title: Serious side effects, kind: adverse_events}
       - {title: "Procedures, ED and hospital", kind: events}
       - {title: Imaging milestones, kind: imaging}
+
+  hospital:
+    chart: hospital
+    file: hospital_timeline.html
+    title: "Procedures and hospital timeline (example)"
+    sub: "Fictional example patient. Hover a marker for details."
+    ranges_ui: [[recent, "2021 – present"], [all, "2015 – present"]]
+    tables:
+      - {title: "Procedures, ED and hospital", kind: stays}
+
+document:                     # the full timeline: document.html with the charts inserted
+  file: document.html
+  output: treatment_timeline
+  figures:
+    FIG_CANCER: {chart: cancer, range: all}
+    FIG_HOSP: {chart: hospital}
 
 chart_pdfs:                   # a printable PDF of a page's chart, every marker numbered, with its tables
   - chart: cancer

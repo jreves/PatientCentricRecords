@@ -292,6 +292,11 @@ def run(cfg, paths, use_llm=True, accept_warnings=False, limit=None, log=print):
         what = "dropped (policy.textless_pages = drop)" if drop_scans else "marked, text not included (no OCR)"
         log(f"Pages with no text layer (scanned images): {sum(map(len, textless.values()))} in "
             f"{len(textless)} doc(s), {what}: {', '.join(sorted(textless))}")
+        # A document with no text at all is lost entirely: say where it is, so OCR can be turned on for that source.
+        for d in docs:
+            if d.textless_pages and len(d.textless_pages) == len(d.pages):
+                log(f"  {d.doc_id}: all {len(d.pages)} page(s) are scans with no text (source '{d.source}'); "
+                    f"set ocr = true for that source to read it")
 
     ner = OllamaNER(cfg["llm"], paths.cache) if use_llm and cfg["llm"].get("enabled", True) else None
     if ner:
@@ -580,7 +585,9 @@ def write_review(review_dir, docs, detected, results):
     index = [f"<html><head><meta charset='utf-8'><title>Redaction review</title>{style}</head><body>",
              "<h1>Redaction review (PRIVATE)</h1><p>Red = names, blue = organizations, yellow = other.</p><ul>"]
     for doc in docs:
-        entries = by_doc[doc.doc_id]
+        entries = by_doc.get(doc.doc_id)
+        if not entries:   # every page was a scan with no text and was dropped: nothing to review
+            continue
         first = min(entries, key=lambda r: (r["date"] or date.max))
         label = f"{first['date']} {first['type'] if len(entries) == 1 else f'encounter, {len(entries)} sections'}"
         n_redactions = sum(len(detected[(doc.doc_id, p)]) for p in range(len(doc.pages)))

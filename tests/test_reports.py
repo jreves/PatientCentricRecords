@@ -19,7 +19,7 @@ def test_example_reads_only_its_own_notes(example):
     assert example.notes == EXAMPLE / "notes"
     from reports import labs
     data, used = labs.parse()
-    assert used == 1 and data["WBC"] == {"2026-09-02": 4.6, "2026-09-16": 3.9}
+    assert used == 8 and data["WBC"]["2026-09-16"] == 3.9 and data["ANC"]["2025-11-17"] == 0.8
 
 
 def test_yaml_dates_and_today_resolved(example):

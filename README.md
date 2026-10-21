@@ -14,7 +14,7 @@ assistant (Claude) help the family build reports from the de-identified notes:
 - a two-page emergency and travel summary (PDF and an editable Word file);
 - pathology and genomic test results alongside the treatments they informed;
 - blood counts, weight and performance status, and medication timelines;
-- a list of open questions and discrepancies to raise with the care team.
+- a list of open questions and discrepancies to raise with the care team;
 - a source audit: every statement in the reports traced to the record note it comes from.
 
 > [!IMPORTANT]
@@ -22,6 +22,17 @@ assistant (Claude) help the family build reports from the de-identified notes:
 > by software and an AI assistant from the records you give it, and they can contain errors and omissions. They are
 > for organizing information and preparing questions, not for diagnosis or treatment decisions. The patient's care
 > team and the original records are always authoritative. Every report carries a disclaimer saying so.
+
+## See what it makes
+
+All of these come from the **fictional example patient** in [`examples/case`](examples/case/). Build them yourself
+with `python -m reports build --case examples/case --out examples/out`.
+
+| | | |
+|:--:|:--:|:--:|
+| <a href="docs/images/full-timeline.png"><img src="docs/images/full-timeline.png" width="260" alt="Full treatment timeline"></a><br>**Full treatment timeline** | <a href="docs/images/treatments-table.png"><img src="docs/images/treatments-table.png" width="260" alt="Cancer treatments table"></a><br>**Every cancer treatment** | <a href="docs/images/emergency-summary.png"><img src="docs/images/emergency-summary.png" width="260" alt="Emergency summary"></a><br>**Emergency and travel summary** |
+| <a href="docs/images/pathology.png"><img src="docs/images/pathology.png" width="260" alt="Pathology and genetics"></a><br>**Pathology and genetics** | <a href="docs/images/blood-counts.png"><img src="docs/images/blood-counts.png" width="260" alt="Blood counts"></a><br>**Blood counts and doses** | <a href="docs/images/disease-overview.png"><img src="docs/images/disease-overview.png" width="260" alt="Disease overview"></a><br>**Disease overview** |
+| <a href="docs/images/medications.png"><img src="docs/images/medications.png" width="260" alt="Medication timeline"></a><br>**Medication timeline** | <a href="docs/images/open-questions.png"><img src="docs/images/open-questions.png" width="260" alt="Open questions"></a><br>**Open questions for the care team** | <a href="docs/images/source-audit.png"><img src="docs/images/source-audit.png" width="260" alt="Source audit"></a><br>**Source audit** |
 
 ## How privacy works
 
@@ -47,6 +58,10 @@ assistant (Claude) help the family build reports from the de-identified notes:
    Suspicious leftovers (anything shaped like a phone number or a name) block publishing until you review them.
 4. **Only then does the hosted AI help.** Claude reads `filtered/` to answer questions and draft the case file, and
    the reports are built from that case file.
+5. **Every statement is checked against its source.** The source audit traces each statement in the reports to a
+   quote in a record note, or labels it a family report, and the local model reads each one as a second check.
+
+[docs/architecture.md](docs/architecture.md) shows how the parts fit together.
 
 **What is kept on purpose:** clinical dates (the sequence of treatment is the point), the patient's age on each
 date (the date of birth is removed), and the names of clinicians and facilities (so you can ask "what did Dr. X
@@ -80,6 +95,9 @@ The first full run is slow: a few minutes per long note on a GPU, much longer on
 later runs take seconds.
 
 ## Quick start
+
+The short version is below. [docs/getting-started.md](docs/getting-started.md) is the step-by-step guide for
+Windows, macOS and Linux.
 
 ```bash
 git clone https://github.com/jreves/PatientCentricRecords.git
@@ -116,6 +134,20 @@ Then:
 To see what the reports look like first, build the fictional example: `python -m reports build --case examples/case --out examples/out`.
 
 When new records arrive, add them to `Sources/` and rerun. Only the new documents go through the model.
+
+## Documentation
+
+| Guide | For |
+|---|---|
+| [Getting started](docs/getting-started.md) | setting up, from installing the tools to the first reports |
+| [When new records arrive](docs/updating-records.md) | the routine for folding in new records |
+| [The source audit](docs/source-audit.md) | reading the audit appendix and acting on it |
+| [How it fits together](docs/architecture.md) | the local and hosted halves, and what each can see |
+| [De-identification](docs/de-identification.md) | what's removed and kept, and how to tune it |
+| [The case file](docs/case-file.md) | every key in the case file and its citations |
+| [Working with Claude](docs/working-with-claude.md) | using Claude Code safely with this project |
+| [Troubleshooting and FAQ](docs/troubleshooting.md) | when something goes wrong |
+| [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) | helping, and reporting privacy problems privately |
 
 ## Repository layout
 

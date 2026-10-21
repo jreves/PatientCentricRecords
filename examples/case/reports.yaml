@@ -74,3 +74,63 @@ emergency:
   hospitals: "Example General Hospital (2/2025)."
   foot: "Fictional example; every name and value is invented."
   creator: "Example family"
+
+pathology:
+  title: "Pathology and tumour genetics (example)"
+  tests:
+    - {id: T1, date: 2015-05-06, kind: tissue, title: Lumpectomy pathology, lab: Example Cancer Center, summary: "2.1 cm invasive ductal carcinoma, 1 of 3 nodes.",
+       res: {ER: [pos, ER 95%], PR: [pos, PR 60%], HER2: [neg, IHC 1+]}}
+    - {id: T2, date: 2021-02-24, kind: tissue, title: T10 biopsy, lab: Example General Hospital, summary: "Metastatic breast carcinoma.",
+       res: {ER: [pos, ER 90%], PR: [neg, PR 0%], HER2: [neg, IHC 0]}}
+    - {id: T3, date: 2023-05-30, kind: blood, title: Liquid biopsy (ctDNA), lab: Example Genomics, summary: "PIK3CA H1047R; ESR1 not detected.",
+       res: {PIK3CA: [pos, H1047R], ESR1: [neg, not detected]}}
+  untested:
+    - [2024-05-14, Liver progression, "CT. No new biopsy or genomic test."]
+    - [2025-08-26, Liver progression, "CT. No new biopsy or genomic test."]
+  markers: [[ER, Estrogen receptor (ER)], [PR, Progesterone receptor (PR)], [HER2, HER2], [PIK3CA, PIK3CA (tumour DNA)], [ESR1, ESR1 (tumour DNA)]]
+  short: {ER: ER, PR: PR, HER2: HER2, PIK3CA: PIK3CA, ESR1: ESR1}
+  treatments:   # [name, class, start, end, basis, test it rested on]
+    - [Letrozole + palbociclib, endo, 2021-03-15, 2023-06-01, HR+ / HER2-negative, T2]
+    - [Fulvestrant + alpelisib, targ, 2023-06-20, 2024-05-20, PIK3CA mutation, T3]
+    - [Capecitabine, chemo, 2024-06-03, 2025-09-10, Not marker-selected, null]
+    - [Sacituzumab govitecan, adc, 2025-10-06, "@today", HR+/HER2-negative after endocrine therapy, null]
+
+blood_counts:
+  title: "Blood counts and chemotherapy doses (example)"
+  doses:   # [drug, class, [[from, to, label]], [[hold from, hold to]]]
+    - [Capecitabine, chemo, [[2024-06-03, 2024-11-04, 1000 mg/m²], [2024-11-04, 2025-09-10, 750 mg/m²]], [[2025-02-11, 2025-02-24]]]
+    - [Sacituzumab govitecan, adc, [[2025-10-06, 2025-11-24, 10 mg/kg], [2025-11-24, "@today", 7.5 mg/kg]], []]
+  events:
+    - [2025-02-11, "Admitted for dehydration (capecitabine held)"]
+    - [2025-11-17, "ANC 0.8 after sacituzumab cycle 2 → dose reduced"]
+
+vitals:
+  title: "Weight, performance status and pain (example)"
+
+medications:
+  title: "Medication timeline (example)"
+  canon_extra: [[Loperamide, Stomach and bowel, loperamide], [Urea cream, Other, urea cream]]
+  extra:   # [name, group, start, end, ongoing, note] for medicines not on the visit lists
+    - [Capecitabine, Cancer treatment, 2024-06-03, 2025-09-10, false, "750 mg/m² from 11/2024"]
+    - [Sacituzumab govitecan, Cancer treatment, 2025-10-06, "@today", true, "7.5 mg/kg from cycle 3"]
+    - [Denosumab, Bone, 2021-03-15, "@today", true, monthly]
+  current: [Ondansetron, Loperamide, Omeprazole]
+
+overview:
+  sites:   # on a 300-wide body figure; the viewer's left is the patient's right
+    - {n: 1, site: Left breast (primary), group: Breast and lymph nodes, x: 186, y: 170, first: 4/2015, how: mammogram 4/14/2015,
+       course: Lumpectomy 5/6/2015; radiation 2015–2016, status: removed}
+    - {n: 2, site: Spine (T10), group: Bones, x: 150, y: 230, first: 2/2021, how: PET 2/18/2021, course: Radiation 3/2021; letrozole + palbociclib,
+       status: treated}
+    - {n: 3, site: Right hip bone (ilium), group: Bones, x: 114, y: 302, first: 2/2021, how: PET 2/18/2021, course: Letrozole + palbociclib, status: treated}
+    - {n: 4, site: Liver, group: Organs, x: 130, y: 250, first: 5/2023, how: CT 5/22/2023, course: "Fulvestrant + alpelisib; capecitabine; partial response on sacituzumab (1/2026)",
+       status: active}
+    - {n: 5, site: Lung nodule, group: Organs, x: 120, y: 160, first: 5/2024, how: CT 5/14/2024, course: Capecitabine, status: treated}
+  negative: "No brain imaging is part of these fictional records."
+  lines:   # [line, label, class, start, end, ongoing, [best date, best text] or null, why ended, prog | tox | now]
+    - [M1, Letrozole + palbociclib, endo, 2021-03-15, 2023-06-01, false, [2021-09-14, "Bone lesions less active"], "Progression: liver", prog]
+    - [M2, Fulvestrant + alpelisib, targ, 2023-06-20, 2024-05-20, false, [2023-12-05, "Liver lesions smaller"], "Progression: liver, lung", prog]
+    - [M3, Capecitabine, chemo, 2024-06-03, 2025-09-10, false, null, "Progression: liver", prog]
+    - [M4, Sacituzumab govitecan, adc, 2025-10-06, "@today", true, [2026-01-12, "Partial response in the liver"], Ongoing, now]
+  lines_title: "B. How each metastatic treatment line worked (example)"
+  usage_title: "C. Hospital and emergency use by year (example)"

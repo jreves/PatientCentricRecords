@@ -3,7 +3,7 @@
 # A real case lives in analysis/case/ (git-ignored) and is written from the de-identified notes in filtered/.
 # The files in this folder are merged in name order; see docs/case-file.md for every key.
 
-reports: [timelines, treatments, questions, emergency]   # which reports this case builds (default: all)
+# reports: [timelines, treatments]   # optional: build only these reports (default: all)
 notes_dir: notes   # this case's de-identified notes (default: the pipeline's filtered/notes)
 
 dates:
@@ -48,3 +48,17 @@ texts:   # prose fragments; {built}, {today}, {records_through} and {summary} ar
   questions_settled: "Resolved with the care team; kept so they are not asked again."
   emergency_when: "Prepared {built} · records through {records_through}"
   emergency_docx_subtitle: "Prepared {built} from the medical records through {records_through}. Fill in the blank cells."
+  blood_counts_sub: "{summary} · white cells, neutrophils, hemoglobin and platelets from the visit lab tables, prepared {built}."
+  vitals_sub: "{summary} · from the visit vital signs, prepared {built}. {stats}"
+  medications_sub: "{summary} · {n} medicines on {visits} visit medication lists, {first} – {last}; prepared {built}."
+  medications_note: "A history of what the visit lists recorded, not a current medication list."
+  pathology_sub: "{summary} · biomarker and tumour-DNA results beside the treatments they informed, prepared {built}."
+  pathology_tracks: "A. One row per marker: each test's result, carried forward until the next test."
+  pathology_mirror: "B. Findings above the time axis, treatments below; ? marks a progression with no new test."
+  pathology_note: "Fictional example. The PIK3CA result selected alpelisib (the link line)."
+  overview_sites: "Every site named in the imaging and pathology reports, numbered on the body outline (front view)."
+  overview_lines: "How long each metastatic treatment line lasted, its best response and why it ended."
+  overview_usage: "Emergency visits, admissions and nights in hospital per year."
+
+audit:
+  authoritative: []   # notes that outrank the rest for what they cover, e.g. the family's current medication list

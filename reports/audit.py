@@ -466,6 +466,9 @@ def norm_find(text, quote):
     return m.start() if m else None
 
 
+UNREADABLE = {"verdict": "unreadable", "facts": 0, "supported": 0, "unsupported_facts": ["the local model's answer could not be read"]}
+
+
 class Semantic:
     def __init__(self):
         from pipeline.config import load_config
@@ -483,7 +486,8 @@ class Semantic:
         f = self.cache / f"{key}.json"
         if f.exists():
             self.hits += 1
-            return verdict(json.loads(f.read_text(encoding="utf-8")))
+            cached = json.loads(f.read_text(encoding="utf-8"))
+            return UNREADABLE if cached.get("unreadable") else verdict(cached)
         if not self.ok:
             return None
         body = {"model": self.model, "stream": False, "think": False, "format": SEM_SCHEMA,
@@ -503,9 +507,10 @@ class Semantic:
             except ValueError:
                 body["options"]["num_predict"] = 2400
         self.calls += 1
-        if out is None:
+        if out is None:   # cached too, so reruns don't re-ask; a changed claim or citation gets a fresh check
             self.bad += 1
-            return {"verdict": "unreadable", "facts": 0, "supported": 0, "unsupported_facts": ["the local model's answer could not be read"]}
+            f.write_text(json.dumps({"unreadable": True}), encoding="utf-8")
+            return UNREADABLE
         f.write_text(json.dumps(out), encoding="utf-8")
         return verdict(out)
 
@@ -750,8 +755,8 @@ def suggest(log=print, keys=None):
             hits = {i for i, (k, _, t) in enumerate(al) if t(d)}
             strong = {i for i in hits if al[i][0] != "date"}
             overlap = len(words & content_words(d["text"]))
-            if dates_only and not (main and d["date"] == main):
-                continue
+            if dates_only and not (main and d["date"] == main) and not (hits and overlap >= 3):
+                continue   # dates alone match any dated table; a same-day note, or the claim's own words, are needed too
             if not dates_only and not strong and overlap < 2:
                 continue
             if not hits and overlap < 2:

@@ -184,9 +184,15 @@ def main():
     peak = max(w, key=lambda p: p[1])
     change = (w[-1][1] - peak[1]) / peak[1] * 100
     rep = "; ".join(f"{lo}–{hi} lb" for d, (lo, hi) in sorted(data["reported"].items())) or "no weight"
-    stats = (f'{len(data["weight"])} measured weights, {len(data["kps"])} Karnofsky scores, {len(data["pps"])} Palliative Performance Scale scores, '
-             f'{len(data["pain"])} pain scores. Weight rose from {w[0][1]:g} lb ({common.fmt(w[0][0])}) to a peak of {peak[1]:g} lb '
-             f'({common.fmt(peak[0])}), then fell to {w[-1][1]:g} lb ({common.fmt(w[-1][0])}; {change:+.0f}% from the peak).')
+    counts = (f'{len(data["weight"])} measured weights, {len(data["kps"])} Karnofsky scores, {len(data["pps"])} Palliative Performance Scale '
+              f'scores, {len(data["pain"])} pain scores.')
+    if peak[0] in (w[0][0], w[-1][0]):   # no rise-then-fall to describe
+        trend = (f' Weight went from {w[0][1]:g} lb ({common.fmt(w[0][0])}) to {w[-1][1]:g} lb ({common.fmt(w[-1][0])}; '
+                 f'{(w[-1][1] - w[0][1]) / w[0][1] * 100:+.0f}%).')
+    else:
+        trend = (f' Weight rose from {w[0][1]:g} lb ({common.fmt(w[0][0])}) to a peak of {peak[1]:g} lb ({common.fmt(peak[0])}), then fell '
+                 f'to {w[-1][1]:g} lb ({common.fmt(w[-1][0])}; {change:+.0f}% from the peak).')
+    stats = counts + trend
     body = (f'<section class="v"><h1>{e(V["title"])}</h1>'
             f'<p class="sub">{C.text("vitals_sub", stats=stats, reported=rep, n_pps=len(data["pps"]))}</p><div class="card">{chart(data)}</div></section>'
             f'<section class="v"><h2>All values</h2><p class="sub">Newest first. "–" = not recorded at that visit.</p><div class="cols3">{table(data, src)}</div>'

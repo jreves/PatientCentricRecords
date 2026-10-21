@@ -618,3 +618,23 @@ def test_updated_label_dates_a_list():
     from pipeline.chrono import note_date
     d, basis = note_date(["Current medications\nOmeprazole 40mg\nUpdated 10/05/2026"])
     assert str(d) == "2026-10-05" and basis == "label 'Updated'"
+
+
+def test_document_of_only_scanned_pages_is_dropped_without_error(tmp_path):
+    """Regression (2026-10-20): a PDF whose every page is an image with no text, under textless_pages = "drop",
+    left no results, and writing the review page then failed."""
+    import shutil
+    from PIL import Image
+    root = tmp_path / "root"
+    (root / "synthetic").mkdir(parents=True)
+    shutil.copy(FIXTURES / "synthetic" / "note_2011_progress.txt", root / "synthetic" / "note.txt")
+    Image.new("RGB", (850, 1100), "white").save(root / "synthetic" / "cover.pdf", "PDF", resolution=100)
+    priv = tmp_path / "priv"
+    priv.mkdir()
+    (priv / "identifiers.toml").write_text(IDENTIFIERS, encoding="utf-8")
+    cfg = {"sources": [{"name": "synthetic", "path": "synthetic"}], "output": {"dir": "out"}, "llm": {"enabled": False},
+           "policy": {"textless_pages": "drop"}, "allowlist": {"terms": []}}
+    paths = Paths(root, priv, tmp_path / "out")
+    run(cfg, paths, use_llm=False, log=lambda *a, **k: None)
+    assert len(list((paths.staging / "notes").glob("*.md"))) == 1
+    assert (paths.review / "index.html").exists()

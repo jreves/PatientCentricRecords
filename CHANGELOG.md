@@ -6,7 +6,14 @@
   audit, an architecture overview with a diagram, troubleshooting and FAQ, CONTRIBUTING and SECURITY.
 - **Example case:** now covers every report, with generated fictional notes (lab tables, vital signs, medication
   lists, running history) and citations. The README shows screenshots from it.
+- **Implants:** a case can list implanted devices (component, specification, manufacturer, catalog number, status),
+  shown with the new `implants` table kind. De-identification keeps what a surgeon needs: GS1 device identifiers and
+  catalog numbers (they name the product, not the patient's device), including unlabelled repeats in an implant log.
+  Serial and lot numbers are still redacted; "Lot no." is now an ID label.
 - **Fixes:**
+  - "female" and "male" are medical terms, so a stray registry entry can't redact them as a name.
+  - The source audit no longer strips "<...>" from note text, which had deleted text between a lab range's "<" and a
+    later ">".
   - A document made only of scanned pages no longer breaks a run; the log names its source.
   - Unreadable model answers are cached, so audits don't re-ask.
   - The vitals subtitle no longer says "rose to a peak" when the first weight is the peak.

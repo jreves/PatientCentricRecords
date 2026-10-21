@@ -88,6 +88,16 @@ adverse_events:               # [date, approximate?, event]
 | event `kind` | `surgery`, `reduction` (closed reduction), `ed`, `hosp`, `proc` (procedure), `img` (work-up; not drawn) |
 | imaging reading | `tri-up` progression / new disease, `tri-down` response, `circle-open` stable or other |
 
+```yaml
+implants:                     # every implanted device: what a surgeon needs before operating on short notice
+  - {date: 2024-03-23, component: Femoral head, spec: "22.2 mm, +3 mm offset, V40 taper, CoCr",
+     manufacturer: Stryker, catalog: 6260-9-222, status: current}
+```
+
+The table kind `implants` lists them, newest first. Copy manufacturer, model, size and catalog numbers exactly as the
+operative note or implant log gives them. Serial and lot numbers identify the individual device and are removed by the
+pipeline.
+
 ## Charts and pages (`charts.yaml`)
 
 `charts:` defines each timeline by `type`:

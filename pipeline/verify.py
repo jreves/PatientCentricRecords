@@ -64,9 +64,12 @@ def verify_texts(texts, identifiers, registry_path, allow, policy=None, ocr_ids=
             # Two-line label checks look at the text with tokens intact: "PATIENT NAME: [PATIENT]" has its value
             # already, and blanking the token would make the next field look like its value (2026-09-28).
             src = orig if name.endswith("next-line") else text
+            kept = rules.kept_ranges(src)
             for m in rx.finditer(src):
                 if "[" in m.group(0) and not name.endswith("next-line"):
                     continue
+                if any(a <= m.start("v") and m.end("v") <= b for a, b in kept) if "v" in rx.groupindex else False:
+                    continue   # a model-level device identifier, kept on purpose
                 if name == "credential-name" and parse_name(m.group("n")) is None:
                     continue  # credential stack after a redacted name, e.g. "[CLINICIAN-01] MSN, RN FNP-C"
                 warns.append((name, doc_id, m.group(0), _context(orig, m.start(), m.end())))

@@ -62,7 +62,8 @@ it.
 |---|---|
 | the patient's names, date of birth, record and account numbers, phones, emails, addresses, home town | clinical dates (the order of treatment is the point) |
 | family members and contacts | the patient's age on each date |
-| specimen and device numbers | clinician, facility and pharmacy names (so "what did Dr. X prescribe?" works) |
+| specimen numbers; device serial and lot numbers | clinician, facility and pharmacy names (so "what did Dr. X prescribe?" works) |
+| | implant manufacturer, model, size, catalog number and GS1 device identifier (what a surgeon needs) |
 | | diagnoses, drugs, doses, results, staging |
 
 Because dates are kept, this is **not** HIPAA "Safe Harbor" de-identification. It's designed so the family can use a

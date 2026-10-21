@@ -620,6 +620,48 @@ def test_updated_label_dates_a_list():
     assert str(d) == "2026-10-05" and basis == "label 'Updated'"
 
 
+def test_model_level_device_identifier_is_kept():
+    """2026-10-21 (user decision): an implant's GS1 device identifier names the product model, which a surgeon needs;
+    serial and lot numbers, and "Device ID" values, identify the patient's own device and are still redacted."""
+    from pipeline import rules
+    t = ("Implant name: FEMORAL HEAD 22.2MM Model/Cat no.: 4410-2-118\n"
+         "Device Identifier: 07613327294912 Device Identifier Type: GS1\n"
+         "Serial no.: 88214031 Lot # 77QK4410\n"
+         "Device ID: 08851234567890")
+    ranges = rules.kept_ranges(t)
+    kept = [t[a:b] for a, b in ranges]
+    assert kept == ["4410-2-118", "07613327294912"]
+    # the run drops ID spans inside kept ranges (core.run, phase 1), whichever detector found them
+    ids = {t[s.start:s.end] for s in rules.detect(t, rules.Denylist({}))
+           if s.cat == "ID" and not any(a <= s.start and s.end <= b for a, b in ranges)}
+    assert not any(k in i for k in kept for i in ids), "the model-level identifier is not redacted"
+    assert {"88214031", "08851234567890"} <= ids and "4410-2-118" not in ids
+    from pipeline.verify import WARN_PATTERNS
+    blanked = t.replace("88214031", "[ID]").replace("77QK4410", "[ID]").replace("08851234567890", "[ID]")
+    kept_r = rules.kept_ranges(blanked)
+    flagged = [m.group(0) for _, rx in WARN_PATTERNS for m in rx.finditer(blanked) if "v" in rx.groupindex
+               and not any(a <= m.start("v") and m.end("v") <= b for a, b in kept_r)]
+    assert not any("07613327294912" in f for f in flagged), "the leak check doesn't flag it"
+
+
+def test_catalog_numbers_in_an_implant_log_are_kept():
+    """Regression (2026-10-21): an implant log printed twice; in one copy the local model flagged the catalog numbers,
+    including the unlabelled repeat after the description. Catalog numbers name the product, like the device
+    identifier, and stay readable; serial and lot numbers are still redacted."""
+    from pipeline import rules
+    t = ("FEMORAL HEAD 28MM +4MM OFFSET TAPER C12 STERILE - 5150-3-407\n"
+         "Inventory Item: FEMORAL HEAD Serial no.: Model/Cat no.: 5150-3-407\n"
+         "INSERT ACETABULAR 28MM CONSTRAIN - 812-11-28F\n"
+         "Inventory Item: INSERT Serial no.: 4471902 Catalog #: 812-11-28F\n"
+         "Lot no.: KQ88214 Exp. Date: 1/2/2029")
+    kept = {t[a:b] for a, b in rules.kept_ranges(t)}
+    assert kept == {"5150-3-407", "812-11-28F"}
+    assert len(rules.kept_ranges(t)) == 4, "the unlabelled repeats are kept too"
+    ids = {t[s.start:s.end] for s in rules.detect(t, rules.Denylist({})) if s.cat == "ID"}
+    assert {"4471902", "KQ88214"} <= ids
+    assert not any(k in i for k in kept for i in ids - {"4471902", "KQ88214"})
+
+
 def test_document_of_only_scanned_pages_is_dropped_without_error(tmp_path):
     """Regression (2026-10-20): a PDF whose every page is an image with no text, under textless_pages = "drop",
     left no results, and writing the review page then failed."""

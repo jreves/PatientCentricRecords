@@ -218,12 +218,18 @@ def table_rows(kind):
                  on_therapy(x["date"])] for x in events() if x["kind"] != "img"]
     if kind.startswith("visits:"):
         return [[fmt(d), cl, f, p] for d, cl, f, p in c["charts"][kind.split(":", 1)[1]]["visits"]]
+    if kind == "implants":   # every implanted component, newest first: what a surgeon needs before operating
+        # catalog numbers must never wrap mid-number: non-breaking hyphens in the display only
+        return [[fmt(i["date"]), i["component"], i["spec"], i.get("manufacturer", ""), str(i.get("catalog", "")).replace("-", "‑"),
+                 i.get("status", "")]
+                for i in sorted(c.get("implants", []), key=lambda i: i["date"], reverse=True)]
     raise KeyError(kind)
 
 
 HEADS = {"therapies": lambda M: ["Dates", "Treatment", "Notes", M], "adverse_events": lambda M: ["Date", "Event", M],
          "events": lambda M: ["Date", "#", "Kind", "Event", "Cancer therapy at the time", M], "imaging": lambda M: ["Date", "Reading", "Finding"],
-         "stays": lambda M: ["Date", "Op", "Kind", "Event", "Stay", "Cancer therapy at the time"], "visits": lambda M: ["Date", "Clinic", "Findings", "Procedure"]}
+         "stays": lambda M: ["Date", "Op", "Kind", "Event", "Stay", "Cancer therapy at the time"], "visits": lambda M: ["Date", "Clinic", "Findings", "Procedure"],
+         "implants": lambda M: ["Implanted", "Component", "Specification", "Manufacturer", "Catalog no.", "Status"]}
 
 
 def tables(page):

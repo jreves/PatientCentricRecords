@@ -71,8 +71,11 @@ def strip_html(s):
     return html.unescape(re.sub(r"<[^>]+>", " ", str(s or "")))
 
 
-def norm(s):
-    s = strip_html(s).lower().replace("–", "-").replace("—", "-").replace("’", "'").replace("×", "x").replace("²", "2")
+def norm(s, markup=True):
+    """Lower-cased, dashes and units unified, whitespace collapsed. Claims may carry HTML (markup=True); note text
+    never does, and stripping "tags" from it would delete everything between a "<" and a ">" (lab ranges like "<=0.5")."""
+    s = (strip_html(s) if markup else html.unescape(str(s or "")))
+    s = s.lower().replace("–", "-").replace("—", "-").replace("’", "'").replace("×", "x").replace("²", "2")
     s = re.sub(r"(\d)\s+(%|mg|cgy|gy|cm|mm|u/ml|lb|mcg|ml)(?![a-z])", r"\1\2", s)   # "1 %" -> "1%" (no \b after "%")
     return re.sub(r"\s+", " ", s).strip()
 
@@ -159,6 +162,10 @@ def event_claims():
     for ev in C.get("early_events", []) + C.get("events", []):
         ds = [(ev["date"], False)] + [(d, False) for d in ev.get("stay", [])]
         out.append(claim(f"event/{ev['date']}/{ev['kind']}", "Events and procedures", f"{fmt(ev['date'])} {ev['kind']}", ev["text"], ds))
+    for i in C.get("implants", []):
+        out.append(claim(f"implant/{i['date']}/{i['component']}", "Implants", f"{fmt(i['date'])} {i['component']}",
+                         f"{i['component']}: {i['spec']} ({i.get('manufacturer', '')}, catalog {i.get('catalog') or 'not recorded'}). "
+                         f"{i.get('status', '')}", [(i["date"], False)]))
     for d, _, text in C.get("imaging", []):
         out.append(claim(f"imaging/{d}", "Imaging", f"{fmt(d)} imaging", text, [(d, False)]))
     for d, approx, text in C.get("adverse_events", []):
@@ -372,7 +379,7 @@ def load_notes():
         if hd:
             y, mo, d = (int(x) for x in hd.groups())
             days.add((y, mo, d)); months.add((y, mo))
-        notes[did] = {"id": did, "text": text, "norm": norm(text), "days": days, "months": months,
+        notes[did] = {"id": did, "text": text, "norm": norm(text, markup=False), "days": days, "months": months,
                       "date": m.get("date") or (hd and "-".join(hd.groups())) or "", "type": m.get("type", ""), "clinic": m.get("clinic", "")}
     return notes
 
@@ -590,7 +597,7 @@ def derived():
     return out
 
 
-AREA_ORDER = ["Treatments", "Treatments table", "Doses", "Side effects", "Pathology", "Imaging", "Events", "Disease sites",
+AREA_ORDER = ["Treatments", "Treatments table", "Doses", "Side effects", "Pathology", "Imaging", "Events", "Implants", "Disease sites",
               "Treatment lines", "Medications", "Emergency summary", "Open questions", "Chart", "Narrative"]
 STATUS = {"broken": ("Citation problem", "#b42318"), "partial": ("Partly grounded", "#b54708"), "unsourced": ("No source yet", "#6b7280"),
           "family": ("Family report", "#3b5bdb"), "grounded": ("Grounded", "#067647")}
@@ -717,7 +724,7 @@ def best_line(doc, al, words):
             continue
         join = len(l) < 60 and i + 1 < len(lines) and not lines[i + 1].startswith("## Page")   # never across a page break
         chunk = l + " " + lines[i + 1] if join else l
-        mini = {"norm": norm(chunk), "text": chunk, **dict(zip(("days", "months"), doc_dates(chunk)))}
+        mini = {"norm": norm(chunk, markup=False), "text": chunk, **dict(zip(("days", "months"), doc_dates(chunk)))}
         sc = sum((1 if kind == "date" else 2) * test(mini) for kind, _, test in al) + len(words & content_words(chunk))
         if sc > score:
             best, score = chunk, sc
@@ -731,7 +738,7 @@ def best_line(doc, al, words):
 
 def line_score(doc, al, words):
     q = best_line(doc, al, words)
-    mini = {"norm": norm(q), "text": q, **dict(zip(("days", "months"), doc_dates(q)))}
+    mini = {"norm": norm(q, markup=False), "text": q, **dict(zip(("days", "months"), doc_dates(q)))}
     return sum((1 if k == "date" else 3) * t(mini) for k, _, t in al) + len(words & content_words(q)), q
 
 

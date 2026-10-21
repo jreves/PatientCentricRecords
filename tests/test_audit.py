@@ -83,3 +83,12 @@ def test_units_written_with_a_space(audit):
     docs = {"n1": note(audit, "n1", "Prednisolone AC | Ophthalmic Drops 1 % 2gtts 1x daily")}
     c = audit.claim("m/1", "Medications", "Prednisolone", "prednisolone acetate 1% eye drops")
     assert audit.audit_claim(c, {"src": [{"doc": "n1"}]}, docs, None)["status"] == "grounded"
+
+
+def test_angle_brackets_in_notes_are_kept(audit):
+    """Regression (2026-10-21): note text was HTML-stripped, deleting everything between a lab range's "<" and a later ">"."""
+    text = "Glucose 98 (Normal is <=99)\nIMPLANT: tibial tray, size 5, uncemented\nCreatinine >0.5"
+    docs = {"n1": note(audit, "n1", text)}
+    docs["n1"]["norm"] = audit.norm(text, markup=False)
+    c = audit.claim("i/1", "Implants", "Tray", "Tibial tray, size 5, uncemented")
+    assert audit.audit_claim(c, {"src": [{"doc": "n1", "quote": "tibial tray, size 5"}]}, docs, None)["status"] == "grounded"

@@ -10,7 +10,7 @@ the treatment history needs.
 | the patient's names → `[PATIENT]` | diagnoses, staging, biomarkers, genes, drugs, doses, trial names |
 | family, caregivers, contacts → `[PERSON-nn]` | clinical dates (the sequence is the point) |
 | date of birth → `[DOB; age 61]` | the patient's age on each note's date (90+ shown as "90+") |
-| record, account, member, accession numbers → `[ID]` | clinician names (`redact_clinicians = true` to remove them) |
+| record, account, member, accession and specimen numbers; device serial and lot numbers → `[ID]` | clinician names (`redact_clinicians = true` to remove them); implant catalog numbers and GS1 device identifiers (they name the product, not the patient's device) |
 | phone and fax numbers → `[PHONE]`, emails → `[EMAIL]`, URLs → `[URL]` | facility and practice names (`redact_facilities = true` to remove them) |
 | street addresses → `[ADDRESS]`; "City, ST" → `[LOCATION]` | states on their own; facility names containing a town |
 

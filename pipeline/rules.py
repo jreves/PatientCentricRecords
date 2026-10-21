@@ -79,7 +79,7 @@ ID_LABEL = (r"(?:ID[ \t]*#|MRN|MR[ \t]*#|MR[ \t]*No\.?|Med(?:ical)?[ \t]+Rec(?:o
             r"|Req(?:uisition)?[ \t]*(?:#|No\.?)|Claim[ \t]*(?:#|No\.?|Number)|SSN"
             # order logs ("CBC - ID: <specimen>") and implant records ("Device ID:", serial and lot numbers);
             # a bare "ID:" is a label too, except a public genetic-database "Variation ID"
-            r"|Device[ \t]*(?:ID|Identifier)|UDI|Serial[ \t]*(?:#|No\.?|Number)|(?<!Variation[ \t])ID(?=[ \t]*:)"
+            r"|Device[ \t]*ID|(?:Serial|Lot)[ \t]*(?:#|No\.?|Number)|(?<!Variation[ \t])ID(?=[ \t]*:)"
             r"|Social[ \t]+Security(?:[ \t]+(?:Number|No\.?|#))?)")
 STREET_SUFFIX = (r"(?:St|Street|Rd|Road|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Ln|Lane|Way|Ct|Court|Pkwy|Parkway"
                  r"|Hwy|Highway|Cir|Circle|Pl|Place|Trl|Trail|Loop|Pike|Ter|Terrace|Sq|Square|Cv|Cove|Xing|Crossing)")
@@ -181,6 +181,28 @@ def literal_pattern(s):
 
 
 ID_LABEL_PREFIX = re.compile(r"^[A-Za-z][A-Za-z #./]{0,24}:[ \t]*")
+
+
+# The device identifier of a UDI (GS1 "DI", e.g. "Device Identifier: 00848486000000") names the product model, not the
+# patient's own device: a surgeon or implant registry looks it up. It is kept; serial and lot numbers (the UDI's
+# production identifier) and "Device ID" values are still redacted.
+MODEL_DEVICE_ID = re.compile(r"\b(?:Device[ \t]+Identifier|UDI[- ]?DI)(?![ \t]*Type)[ \t]*:?[ \t]*(?P<v>(?:\(01\))?\d{8,14})\b", re.I)
+# A manufacturer's catalog number ("Model/Cat no.: 6260-9-222") is the product's part number, kept for the same reason.
+# 2026-10-21: of two copies of one implant log, the local model flagged the catalog numbers in one.
+CATALOG_NO = re.compile(r"\b(?:Model[ \t]*/[ \t]*)?Cat(?:alog)?[ \t]*(?:#|No\.?|Number)[ \t]*:?[ \t]*"
+                        r"(?P<v>(?=[A-Z0-9./-]*\d)[A-Z0-9](?:[A-Z0-9./-]*[A-Z0-9])?)(?![\w-])", re.I)
+
+
+def kept_ranges(text):
+    """[(start, end)] of values the pipeline keeps although they look like IDs: model-level device identifiers and
+    catalog numbers, and repeats of those values elsewhere in the text (implant logs print the catalog number again
+    after the description, unlabelled)."""
+    found = [m.span("v") for rx in (MODEL_DEVICE_ID, CATALOG_NO) for m in rx.finditer(text)]
+    values = {text[a:b] for a, b in found if b - a >= 5}
+    if values:
+        alt = "|".join(re.escape(v) for v in sorted(values, key=len, reverse=True))
+        found += [m.span() for m in re.finditer(rf"(?<![\w-])(?:{alt})(?![\w-])", text)]
+    return sorted(set(found))
 
 
 def normalized_ids(identifiers):

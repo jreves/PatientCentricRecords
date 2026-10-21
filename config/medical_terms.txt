@@ -333,3 +333,8 @@ ecog
 karnofsky
 recist
 PET scan
+# sex fields ("Legal Sex: Female") were taken for a person's name (2026-10-21)
+female
+male
+old female
+old male

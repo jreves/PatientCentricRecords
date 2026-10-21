@@ -305,7 +305,7 @@ def run(cfg, paths, use_llm=True, accept_warnings=False, limit=None, log=print):
         log("LLM detection: DISABLED (rules and identifiers only; output is not publishable)")
 
     # Phase 1: detect on every page and collect name mentions.
-    detected, mentions, failed_docs, unlocated = {}, [], set(), 0
+    detected, mentions, failed_docs, unlocated, kept_values = {}, [], set(), 0, set()
     for i, doc in enumerate(docs, 1):
         for p, text in enumerate(doc.pages):
             spans = rules.detect(text, denylist)
@@ -319,7 +319,11 @@ def run(cfg, paths, use_llm=True, accept_warnings=False, limit=None, log=print):
                 llm_spans, missing = locate_llm(text, ents, allow)
                 spans += llm_spans
                 unlocated += missing
-            spans = [s for s in spans if s.end > s.start]
+            kept = rules.kept_ranges(text)   # model-level device identifiers and catalog numbers stay readable
+            # any non-name label: the local model's type labels are unreliable (it may call a catalog number OTHER)
+            spans = [s for s in spans if s.end > s.start
+                     and not (s.cat not in NAME_CATS and any(a <= s.start and s.end <= b for a, b in kept))]
+            kept_values.update(text[a:b] for a, b in kept)
             detected[(doc.doc_id, p)] = spans
             mentions += [(text[s.start:s.end], s.cat) for s in spans if s.cat in NAME_CATS | {"FACILITY"}]
         extra = f", LLM calls {ner.calls} / cached {ner.cache_hits}" if ner else ""
@@ -335,7 +339,7 @@ def run(cfg, paths, use_llm=True, accept_warnings=False, limit=None, log=print):
     corpus_ids = {doc.pages[p][s.start:s.end] for (doc_id, p), spans in detected.items()
                   for doc in [by_doc_id[doc_id]] for s in spans
                   if s.cat == "ID" and s.source in ID_SOURCES}
-    corpus_ids = {v for v in corpus_ids if len(v) >= 6 and any(c.isdigit() for c in v)}
+    corpus_ids = {v for v in corpus_ids if len(v) >= 6 and any(c.isdigit() for c in v) and v not in kept_values}
     if corpus_ids:   # one alternation (longest first): a pattern per ID made each page ~1,000 scans (2026-09-28)
         alt = "|".join(re.escape(v) for v in sorted(corpus_ids, key=len, reverse=True))
         patterns.append((re.compile(rf"(?<![\w-])(?:{alt})(?![\w-])"), "[ID]", "ID", False))

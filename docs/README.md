@@ -1,6 +1,7 @@
 # docs
 
 - [getting-started.md](getting-started.md): setup on Windows, macOS and Linux, through the first reports.
+- [gathering-records.md](gathering-records.md): which portal records are worth downloading, and how detailed.
 - [updating-records.md](updating-records.md): the routine when new records arrive.
 - [source-audit.md](source-audit.md): reading the source-audit appendix and acting on it.
 - [architecture.md](architecture.md): the local and hosted halves, and what each can see.

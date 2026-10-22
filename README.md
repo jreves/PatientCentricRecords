@@ -140,6 +140,7 @@ When new records arrive, add them to `Sources/` and rerun. Only the new document
 | Guide | For |
 |---|---|
 | [Getting started](docs/getting-started.md) | setting up, from installing the tools to the first reports |
+| [Gathering records](docs/gathering-records.md) | which portal records are worth downloading, and how detailed |
 | [When new records arrive](docs/updating-records.md) | the routine for folding in new records |
 | [The source audit](docs/source-audit.md) | reading the audit appendix and acting on it |
 | [How it fits together](docs/architecture.md) | the local and hosted halves, and what each can see |

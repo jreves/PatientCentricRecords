@@ -107,7 +107,7 @@ own records. The last one, `source_audit_*.pdf`, shows where each statement come
 1. **Download the records.** Patient portals usually offer each visit note as a PDF. Many also have a "download my
    record" or "View, Download, Transmit" export, which gives C-CDA XML; prefer that for hospital summaries, because
    it's read more accurately than a PDF printout. Scanned paper records work as PDFs. Phone photos (JPG/PNG) don't:
-   save them as PDF first.
+   save them as PDF first. [gathering-records.md](gathering-records.md) says which records are worth getting.
 2. **Put them in subfolders of `Sources/`**, one per source, for example `Sources/clinical-notes`,
    `Sources/hospital-records` and `Sources/scanned-records`.
 3. **List each subfolder in `config/local.toml`**, as a `[[sources]]` block (the file shows how). Add `ocr = true`

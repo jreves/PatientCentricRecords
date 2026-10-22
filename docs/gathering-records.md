@@ -111,8 +111,9 @@ They often arrive as scanned paper. That works, as long as OCR is turned on for 
 1. **C-CDA XML** ("download my record") and **PDFs with selectable text** (portal downloads, "print to PDF"). They are
    read exactly.
 2. **Word documents and spreadsheets** (your own medication list, a lab export).
-3. **Scanned PDFs.** These are read with OCR: good on clean print, less reliable on faxes, handwriting and tables.
-4. **Phone photos** (JPG or PNG) are not read. Save them as PDF first, or better, ask for the original record.
+3. **Scanned PDFs, screenshots and images** (PNG, JPEG, TIFF). These are read with OCR when it's on for their folder:
+   good on clean print and screenshots, less reliable on faxes, handwriting, tables and phone photos taken at an angle.
+   When you can, ask for the original record instead.
 
 To check a PDF, try selecting a word in it. If you can, it has text.
 

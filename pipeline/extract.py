@@ -24,7 +24,7 @@ class Document:
     @property
     def textless_pages(self):
         """1-based numbers of pages with no usable text (scanned images; not de-identified or published)."""
-        if self.kind != "pdf":
+        if self.kind not in SCANNABLE:
             return []
         return [i for i, p in enumerate(self.pages, 1) if len(p.strip()) < TEXTLESS]
 
@@ -123,7 +123,21 @@ def _xml_pages(path):
     return ccda.read(path)   # None if not C-CDA -> counted as unsupported
 
 
-READERS = {".pdf": _pdf_pages, ".txt": _txt_pages, ".docx": _docx_pages, ".xlsx": _xlsx_pages, ".xml": _xml_pages}
+def _image_pages(path):
+    """An image file has no text layer: one empty page per frame (multi-page TIFFs from fax and scan software). Its
+    text comes only from OCR, for sources with `ocr = true`; otherwise its pages count as textless scans."""
+    from PIL import Image
+    try:
+        with Image.open(path) as img:
+            return [""] * getattr(img, "n_frames", 1)
+    except OSError:
+        return None   # not a readable image -> counted as unsupported
+
+
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff")
+SCANNABLE = ("pdf",) + tuple(e.lstrip(".") for e in IMAGE_EXTS)   # kinds whose pages may be scans needing OCR
+READERS = {".pdf": _pdf_pages, ".txt": _txt_pages, ".docx": _docx_pages, ".xlsx": _xlsx_pages, ".xml": _xml_pages,
+           **{e: _image_pages for e in IMAGE_EXTS}}
 TEXTLESS = 50   # a page with fewer characters is treated as having no text layer (e.g. a scan)
 
 
@@ -173,12 +187,13 @@ def load_documents(root, sources, ocr=None, text_cache=None):
                 continue
             ext = os.path.splitext(name)[1].lower().lstrip(".")
             doc = Document(sha[:10], src["name"], name, pages, ext)
-            if src.get("ocr") and ext == "pdf":
+            if src.get("ocr") and ext in SCANNABLE:
                 if ocr is None:
                     raise RuntimeError(f"source '{src['name']}' needs OCR but OCR is not configured")
+                recognise = ocr.page if ext == "pdf" else ocr.image
                 for i, text in enumerate(pages):
                     if len(text.strip()) < TEXTLESS:
-                        ocr_text, conf = ocr.page(raw, sha, i)
+                        ocr_text, conf = recognise(raw, sha, i)
                         doc.pages[i] = _clean(ocr_text)
                         doc.ocr_pages[i + 1] = conf
             docs.append(doc)

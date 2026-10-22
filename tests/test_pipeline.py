@@ -505,6 +505,38 @@ def test_tesseract_ocr_roundtrip(tmp_path):
     assert ocr.page(pdf.read_bytes(), "a" * 64, 0) == (text, conf) and ocr.cache_hits == 1
 
 
+def test_image_files_are_read_with_ocr(tmp_path):
+    """2026-10-22: a report saved only as a screenshot (PNG) was skipped as unsupported. Image files are now read with
+    OCR in sources with `ocr = true` (small screenshots are enlarged first); elsewhere their pages count as textless."""
+    from PIL import Image, ImageDraw, ImageFont
+    from pipeline.extract import load_documents
+    from pipeline.ocr import OCR, OCRError
+    try:
+        ocr = OCR({}, tmp_path / "cache")
+    except OCRError:
+        pytest.skip("Tesseract not installed")
+    try:
+        font = ImageFont.truetype("arial.ttf", 22)
+    except OSError:
+        pytest.skip("no TrueType font for the synthetic screenshot")
+    for folder in ("scans", "plain"):
+        (tmp_path / folder).mkdir()
+        img = Image.new("RGB", (900, 260), "white")   # a screenshot-sized image, ~96 dpi
+        ImageDraw.Draw(img).multiline_text((30, 30), "CT CHEST WITH CONTRAST\nExam date: 05/09/2019\nIMPRESSION: No acute findings.",
+                                           fill="black", font=font, spacing=14)
+        img.save(tmp_path / folder / "report.png")
+    sources = [{"name": "scans", "path": "scans", "ocr": True}, {"name": "plain", "path": "plain"}]
+    docs, stats = load_documents(tmp_path, sources, ocr=ocr)
+    assert stats["unsupported"] == 0 and len(docs) == 1, "the same image in both folders is one document"
+    doc = docs[0]
+    assert doc.kind == "png" and "05/09/2019" in doc.pages[0] and "IMPRESSION" in doc.pages[0]
+    assert doc.ocr_pages[1] > 70 and doc.textless_pages == []
+    docs, _ = load_documents(tmp_path, sources[1:], ocr=None)
+    assert docs[0].textless_pages == [1], "without OCR the image is a textless scan (dropped or marked, and logged)"
+    from pipeline.chrono import note_type
+    assert note_type(["XR CHEST 2 VIEWS\nFinal Result\nEXAM: XRAY OF THE CHEST"]) == "imaging", "XR / XRAY headers are imaging"
+
+
 def test_reports_quoted_in_notes_are_cross_referenced_not_dropped():
     """2026-09-28: radiology reports can also appear inside clinical notes; keep the report, record where it's quoted."""
     from pipeline.dedup import find_duplicates, find_quotes

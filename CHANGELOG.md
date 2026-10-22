@@ -4,6 +4,10 @@
 
 - **Documentation:** a getting-started guide (Windows, macOS, Linux), a routine for new records, a guide to the source
   audit, an architecture overview with a diagram, troubleshooting and FAQ, CONTRIBUTING and SECURITY.
+- **Gathering records:** a guide to which portal records are worth downloading, and how detailed.
+- **Image files:** PNG, JPEG and TIFF (one page per frame) are read with OCR in sources with `ocr = true`, so a report
+  that exists only as a screenshot can be used. Screenshots are enlarged before recognition. "XR"/"XRAY" reports are
+  typed as imaging.
 - **Example case:** now covers every report, with generated fictional notes (lab tables, vital signs, medication
   lists, running history) and citations. The README shows screenshots from it.
 - **Implants:** a case can list implanted devices (component, specification, manufacturer, catalog number, status),

@@ -38,7 +38,7 @@ NOTE_TYPES = [
     ("discharge-summary", r"discharge summary"),
     ("admission-h&p", r"history and physical|\bh&p\b|admission note"),
     ("emergency", r"emergency department|\bed visit\b|emergency room"),
-    ("imaging", r"mammogra|ultrasound|\bmri\b|\bct\b|pet/ct|pet-ct|bone scan|nuclear medicine|x-ray|radiograph"
+    ("imaging", r"mammogra|ultrasound|\bmri\b|\bct\b|pet/ct|pet-ct|bone scan|nuclear medicine|x-?ray|xr|radiograph"
                 r"|echocardiogra|muga|dexa"),
     ("infusion", r"infusion|chemotherapy administration|treatment note"),
     ("lab", r"lab(?:oratory)? results?|\bcbc\b|comprehensive metabolic"),

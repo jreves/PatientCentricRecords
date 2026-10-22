@@ -36,7 +36,7 @@ Then **propagation**: every name found anywhere is searched for everywhere, as "
 middle initials, and as a bare surname or first name (capitalized only). This catches the page where the model missed
 a name it found elsewhere. IDs found by a rule are propagated the same way.
 
-**Scanned records** are OCR'd with Tesseract. OCR misreads letters ("Th0rnbury"), so known names and numbers are also
+**Scanned records and image files** (PNG, JPEG, TIFF) are OCR'd with Tesseract. OCR misreads letters ("Th0rnbury"), so known names and numbers are also
 matched fuzzily in OCR'd text, and the leak check repeats that.
 
 ## The registry

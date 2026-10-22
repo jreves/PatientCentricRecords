@@ -43,8 +43,10 @@ Add it to `no_bare_match` in `config/local.toml`. It's still removed inside a fu
 That document is made only of scanned images, and its source doesn't have OCR on, so it's left out. Either set
 `ocr = true` for that source (needs Tesseract), or get a text PDF of the document.
 
-**Photos aren't read**
-JPG and PNG files are skipped. Save them as PDF, as a scan or "print to PDF", and set `ocr = true` for the source.
+**Screenshots and photos aren't read**
+PNG, JPEG and TIFF files are read only with OCR: set `ocr = true` for their source (needs Tesseract). Without it
+they count as scans with no text. Other image formats (HEIC from iPhones, for example) are skipped: save them as PNG,
+JPEG or PDF first.
 
 **A note has the wrong date, or is marked ⚠**
 Dates are read from labels like "Date of Service" in the *de-identified* text. `filtered/timeline.md` marks

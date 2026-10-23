@@ -33,6 +33,7 @@ with `python -m reports build --case examples/case --out examples/out`.
 | <a href="docs/images/full-timeline.png"><img src="docs/images/full-timeline.png" width="260" alt="Full treatment timeline"></a><br>**Full treatment timeline** | <a href="docs/images/treatments-table.png"><img src="docs/images/treatments-table.png" width="260" alt="Cancer treatments table"></a><br>**Every cancer treatment** | <a href="docs/images/emergency-summary.png"><img src="docs/images/emergency-summary.png" width="260" alt="Emergency summary"></a><br>**Emergency and travel summary** |
 | <a href="docs/images/pathology.png"><img src="docs/images/pathology.png" width="260" alt="Pathology and genetics"></a><br>**Pathology and genetics** | <a href="docs/images/blood-counts.png"><img src="docs/images/blood-counts.png" width="260" alt="Blood counts"></a><br>**Blood counts and doses** | <a href="docs/images/disease-overview.png"><img src="docs/images/disease-overview.png" width="260" alt="Disease overview"></a><br>**Disease overview** |
 | <a href="docs/images/medications.png"><img src="docs/images/medications.png" width="260" alt="Medication timeline"></a><br>**Medication timeline** | <a href="docs/images/open-questions.png"><img src="docs/images/open-questions.png" width="260" alt="Open questions"></a><br>**Open questions for the care team** | <a href="docs/images/source-audit.png"><img src="docs/images/source-audit.png" width="260" alt="Source audit"></a><br>**Source audit** |
+| <a href="docs/images/chemo-cycles.png"><img src="docs/images/chemo-cycles.png" width="260" alt="Chemotherapy cycles"></a><br>**Chemotherapy cycles** | | |
 
 ## How privacy works
 
@@ -180,6 +181,7 @@ python -m pipeline audit                # de-identification: count-only check fo
 python -m pipeline ids                  # count-only inventory of record numbers found
 python -m reports build [--only NAME]   # build the reports from analysis/case
 python -m reports audit [--suggest]     # reports: the source audit (every statement cited and checked); --suggest proposes citations
+python -m reports cycles --discover     # propose chemotherapy regimens and their cycles from the notes (cycles.suggested.yaml)
 python -m pytest -q                     # tests (synthetic data only)
 ```
 

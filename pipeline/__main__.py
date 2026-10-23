@@ -1,6 +1,7 @@
 """CLI: python -m pipeline {init,run,verify,audit,ids,doctor}"""
 import argparse
 import pathlib
+import re
 import shutil
 import sys
 
@@ -10,6 +11,14 @@ from .llm import LLMError
 from .ocr import OCRError
 from .names import Allowlist
 from .verify import verify_texts, write_report
+
+
+def mask_doc_ids(text, doc_ids):
+    """The pipeline's own document ids (sha prefixes, sometimes all digits; sections add "-sN") -> [DOC]."""
+    if not doc_ids:
+        return text
+    alt = "|".join(re.escape(i) for i in sorted(doc_ids, key=len, reverse=True))
+    return re.sub(rf"(?<![\w-])(?:{alt})(?:-s\d+)?(?![\w-])", "[DOC]", text)
 
 
 FOLDERS = pathlib.Path(__file__).resolve().parent / "folders"   # README for each data folder (the folders are git-ignored)
@@ -85,9 +94,11 @@ def main():
         return 0
     if args.cmd == "verify":
         notes = sorted((paths.output / "notes").glob("*.md"))
-        texts = {p.stem.rsplit("_", 1)[-1]: p.read_text(encoding="utf-8") for p in notes}
         import json
         manifest = json.loads((paths.output / "manifest.json").read_text(encoding="utf-8"))
+        doc_ids = {e["doc_id"] for e in manifest} | {p.stem.rsplit("_", 1)[-1] for p in notes}
+        # a published file names documents by id (its header, cross-references); an all-digit id is not a record number
+        texts = {p.stem.rsplit("_", 1)[-1]: mask_doc_ids(p.read_text(encoding="utf-8"), doc_ids) for p in notes}
         ocr_ids = {e["doc_id"] for e in manifest if e.get("ocr_pages")}
         fails, warns = verify_texts(texts, load_identifiers(paths), paths.registry, Allowlist(cfg),
                                     cfg.get("policy", {}), ocr_ids)

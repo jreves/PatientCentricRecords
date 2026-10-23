@@ -168,8 +168,13 @@ def load_documents(root, sources, ocr=None, text_cache=None):
     stats = {"unsupported": 0, "duplicates": 0}
     for src in sources:
         directory = long_path(root / src["path"])
-        for name in sorted(os.listdir(directory)):
-            full = os.path.join(directory, name)
+        # Subfolders are read too (a portal download often unpacks into one); hidden files and folders are skipped.
+        files = []
+        for top, dirs, names in os.walk(directory):
+            dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+            files += [os.path.join(top, n) for n in sorted(names) if not n.startswith(".")]
+        for full in files:
+            name = os.path.basename(full)
             reader = READERS.get(os.path.splitext(name)[1].lower())
             if reader is None or not os.path.isfile(full):
                 stats["unsupported"] += 1

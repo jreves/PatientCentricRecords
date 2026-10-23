@@ -5,7 +5,7 @@ import tomllib
 from dataclasses import dataclass
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PIPELINE_VERSION = "0.8.6"
+PIPELINE_VERSION = "0.8.7"
 
 
 @dataclass

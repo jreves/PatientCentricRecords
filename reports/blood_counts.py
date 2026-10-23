@@ -73,9 +73,14 @@ def chart(data):
             low = v < lo
             s.append(f'<circle cx="{x(d):.1f}" cy="{yv(v):.1f}" r="{3.2 if low else 2.2}" fill="{"var(--series-2)" if low else "var(--text-primary)"}"/>')
         # label each panel's lowest value and the latest one
+        placed = []
         for d, v in dict.fromkeys([min(pts, key=lambda p: p[1]), pts[-1]]):
             anc, dx = ("end", -6) if x(d) > W - R - 110 else ("start", 6)
-            s.append(f'<text x="{x(d) + dx:.1f}" y="{yv(v) + (12 if v < lo else -6):.1f}" text-anchor="{anc}" font-size="10" font-weight="600" '
+            ty = yv(v) + (12 if v < lo else -6)
+            if any(abs(x(d) - px) < 130 and abs(ty - py) < 12 for px, py in placed):   # lowest and latest close together
+                ty -= 14 if v >= lo else -14
+            placed.append((x(d), ty))
+            s.append(f'<text x="{x(d) + dx:.1f}" y="{ty:.1f}" text-anchor="{anc}" font-size="10" font-weight="600" '
                      f'fill="var(--text-primary)" stroke="var(--surface-1)" stroke-width="3" paint-order="stroke">{v:g} ({common.fmt(d)})</text>')
         s.append(f'<line x1="{L}" x2="{W - R}" y1="{y + h - 4}" y2="{y + h - 4}" stroke="var(--grid)"/>')
         y += h

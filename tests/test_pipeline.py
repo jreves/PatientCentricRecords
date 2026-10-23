@@ -537,6 +537,33 @@ def test_image_files_are_read_with_ocr(tmp_path):
     assert note_type(["XR CHEST 2 VIEWS\nFinal Result\nEXAM: XRAY OF THE CHEST"]) == "imaging", "XR / XRAY headers are imaging"
 
 
+def test_standalone_verify_ignores_document_ids():
+    """2026-10-23: `pipeline verify` reads whole published files, whose headers and cross-references name documents by
+    id; an all-digit id (a sha prefix) looked like a long record number. Only the pipeline's own ids are masked."""
+    from pipeline.__main__ import mask_doc_ids
+    from pipeline.verify import WARN_PATTERNS
+    text = "doc_id: 7044536025\nAlso quoted in 7044536025-s3 and ab12cd34ef.\nAccount 8812345678 on file."
+    masked = mask_doc_ids(text, {"7044536025", "ab12cd34ef"})
+    assert masked.count("[DOC]") == 3 and "8812345678" in masked
+    rx = dict(WARN_PATTERNS)["long-number"]
+    assert [m.group("v") for m in rx.finditer(masked)] == ["8812345678"], "a real long number is still flagged"
+
+
+def test_subfolders_of_a_source_are_read(tmp_path):
+    """2026-10-22: a portal download unpacked into a subfolder of a source was skipped (counted as one unsupported item),
+    though `doctor` counted its files. Subfolders are read; hidden files and folders are not."""
+    from pipeline.extract import load_documents
+    (tmp_path / "notes" / "visits" / "2026").mkdir(parents=True)
+    (tmp_path / "notes" / ".hidden").mkdir()
+    (tmp_path / "notes" / "top.txt").write_text("Visit note one, 3/2/2026.", encoding="utf-8")
+    (tmp_path / "notes" / "visits" / "2026" / "deep.txt").write_text("Visit note two, 3/9/2026.", encoding="utf-8")
+    (tmp_path / "notes" / ".hidden" / "skip.txt").write_text("Not this one.", encoding="utf-8")
+    (tmp_path / "notes" / ".DS_Store").write_text("x", encoding="utf-8")
+    docs, stats = load_documents(tmp_path, [{"name": "notes", "path": "notes"}])
+    assert sorted(d.pages[0] for d in docs) == ["Visit note one, 3/2/2026.", "Visit note two, 3/9/2026."]
+    assert stats["unsupported"] == 0
+
+
 def test_reports_quoted_in_notes_are_cross_referenced_not_dropped():
     """2026-09-28: radiology reports can also appear inside clinical notes; keep the report, record where it's quoted."""
     from pipeline.dedup import find_duplicates, find_quotes

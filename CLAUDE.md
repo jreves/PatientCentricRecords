@@ -57,6 +57,7 @@ python -m pipeline verify              # re-check published output, e.g. after a
 python -m pipeline audit               # count-only report of redacted 'people' that may be drugs/tests
 python -m pipeline ids                 # count-only inventory of detected IDs; values go to private/ for the user
 python -m reports build [--only NAME]  # reports from analysis/case (or --case DIR)
+python -m reports cycles --discover    # propose chemotherapy regimens from the notes, for review (cycles.suggested.yaml)
 python -m pytest -q                    # synthetic regression tests
 ```
 

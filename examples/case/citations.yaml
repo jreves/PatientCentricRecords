@@ -83,6 +83,69 @@ emergency/risk/On denosumab:
   src:
   - doc: ex00000009
     quote: denosumab 120 mg monthly from 3/15/2021
+cycles/Sacituzumab govitecan/schedule:
+  src:
+  - doc: ex00000010
+    quote: 'Sacituzumab govitecan 10 mg/kg D1,8 Q21D Cycle Length: 21'
+  - doc: ex00000010
+    quote: 'Start: C1D1 on 10/06/2025'
+cycles/Sacituzumab govitecan/dose/2025-10-06:
+  src:
+  - doc: ex00000009
+    quote: 'sacituzumab govitecan 10 mg/kg days 1 and 8 q21 days: from 10/6/2025'
+cycles/Sacituzumab govitecan/dose/2025-11-24:
+  src:
+  - doc: ex00000007
+    quote: Sacituzumab govitecan cycle 3.
+  - doc: ex00000007
+    quote: dose reduced to 7.5 mg/kg.
+cycles/Sacituzumab govitecan/day1/2025-11-24:
+  src:
+  - doc: ex00000007
+    quote: Sacituzumab govitecan cycle 3.
+cycles/Sacituzumab govitecan/infusion/2026-08-03:
+  src:
+  - doc: ex00000013
+    quote: Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 08/03/2026.
+cycles/Sacituzumab govitecan/infusion/2026-08-10:
+  src:
+  - doc: ex00000014
+    quote: Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 08/10/2026.
+cycles/Sacituzumab govitecan/infusion/2026-08-24:
+  src:
+  - doc: ex00000015
+    quote: Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 08/24/2026.
+cycles/Sacituzumab govitecan/infusion/2026-09-14:
+  src:
+  - doc: ex00000016
+    quote: Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 09/14/2026.
+cycles/Sacituzumab govitecan/infusion/2026-09-21:
+  src:
+  - doc: ex00000017
+    quote: Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 09/21/2026.
+cycles/Sacituzumab govitecan/not_given/2026-08-31:
+  src:
+  - doc: ex00000011
+    quote: The cycle 16 day 8 dose on 8/31/2026 was held for ANC 0.9; growth factor given.
+cycles/Sacituzumab govitecan/effect/2025-11-17:
+  src:
+  - doc: ex00000007
+    quote: Neutropenia grade 3 after cycle 2 (ANC 0.8 on 11/17/2025); growth factor added, dose reduced to 7.5 mg/kg.
+cycles/Sacituzumab govitecan/effect/2026-08-24:
+  src:
+  - doc: ex00000010
+    quote: After cycle 15 she had mild fatigue for 2-3 days after each dose; no diarrhea or fever.
+cycles/Sacituzumab govitecan/effect/2026-09-14:
+  src:
+  - doc: ex00000011
+    quote: Mild nausea, controlled with ondansetron.
+cycles/Sacituzumab govitecan/effect/2026-09-28:
+  src:
+  - doc: ex00000012
+    quote: Tolerating treatment; mild hair thinning; no fever.
+cycles/Sacituzumab govitecan/effect/2026-08-27:
+  src:
+  - family: the family's symptom log, 8/27/2026
 therapy/systemic/AC → paclitaxel/2015-06-01:
   src:
   - doc: ex00000003
@@ -185,54 +248,54 @@ ae/2025-11-20:
       grade 3 after cycle 2 (ANC 0.8 on 11/17/2025); growth factor added, dose reduced to 7.5 mg/kg.'
 treatments//Doxorubicin + cyclophosphamide:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> adjuvant AC --> paclitaxel: doxorubicin + cyclophosphamide every 2 weeks x4 6/2015 - 8/2015, then paclitaxel weekly x12 8/2015
       - 11/2015'
 treatments//+ paclitaxel:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> adjuvant AC --> paclitaxel: doxorubicin + cyclophosphamide every 2 weeks x4 6/2015 - 8/2015, then paclitaxel weekly x12 8/2015
       - 11/2015'
 treatments//Tamoxifen:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: ===> tamoxifen 1/2016 - 2/2018 --> switched to letrozole for hot flashes
 treatments//Letrozole:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole 2.5 mg daily 2/2018 - 2/2021 (adjuvant) METASTATIC RECURRENCE: PET [2/18/2021] = new T10 and right iliac bone lesions'
 treatments/1/Letrozole:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole 2.5 mg daily 2/2018 - 2/2021 (adjuvant) METASTATIC RECURRENCE: PET [2/18/2021] = new T10 and right iliac bone lesions'
 treatments/1/+ palbociclib:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole + palbociclib 125 mg (3 weeks on / 1 off): 3/15/2021 - 6/1/2023; denosumab 120 mg monthly from 3/15/2021'
 treatments/2/Fulvestrant:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '--liquid bx [5/30/2023] = PIK3CA H1047R, ESR1 not detected ===> fulvestrant 500 mg monthly + alpelisib 300 mg daily: 6/20/2023 - 5/20/2024'
 treatments/2/+ alpelisib:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '--liquid bx [5/30/2023] = PIK3CA H1047R, ESR1 not detected ===> fulvestrant 500 mg monthly + alpelisib 300 mg daily: 6/20/2023 - 5/20/2024'
 treatments/3/Capecitabine:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> capecitabine 1000 mg/m2 twice daily, days 1-14 q21 days: 6/3/2024 - 9/10/2025 (Dr. Owen Tremblay)'
 treatments/4/Sacituzumab govitecan:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: 'PROGRESSION: CT [8/26/2025] = liver progression ===> sacituzumab govitecan 10 mg/kg days 1 and 8 q21 days: from 10/6/2025 (Dr. Owen
       Tremblay)'
 treatments/radiation/Left breast:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> whole breast radiation [50 Gy / 25 fx]: 12/7/2015 - 1/8/2016 (Dr. Priya Raman)'
 treatments/radiation/T10 spine:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> radiation T10 spine [20 Gy / 5 fx]: 3/1/2021 - 3/5/2021, palliative (Dr. Priya Raman)'
 pathology/T1:
   src:
@@ -289,28 +352,28 @@ medications/Denosumab:
     quote: '===> letrozole + palbociclib 125 mg (3 weeks on / 1 off): 3/15/2021 - 6/1/2023; denosumab 120 mg monthly from 3/15/2021'
 medications/current:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: Ondansetron Oral 8 mg every 8 hours as needed Loperamide Oral 2 mg as needed
 overview/site/1:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: --screening mammogram [4/14/2015] = left breast mass ===> L lumpectomy + sentinel LN bx [5/6/2015] = 2.1 cm invasive ductal carcinoma,
       1/3 LN+, ER 95%, PR 60%, HER2 1+ (Dr. Maya Lindqvist)
 overview/site/2:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole + palbociclib 125 mg (3 weeks on / 1 off): 3/15/2021 - 6/1/2023; denosumab 120 mg monthly from 3/15/2021'
 overview/site/3:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole 2.5 mg daily 2/2018 - 2/2021 (adjuvant) METASTATIC RECURRENCE: PET [2/18/2021] = new T10 and right iliac bone lesions'
 overview/site/4:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '--liquid bx [5/30/2023] = PIK3CA H1047R, ESR1 not detected ===> fulvestrant 500 mg monthly + alpelisib 300 mg daily: 6/20/2023 - 5/20/2024'
 overview/site/5:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: 'PROGRESSION: CT [5/14/2024] = liver lesions larger, new lung nodule'
 overview/line/M1:
   src:
@@ -333,19 +396,19 @@ overview/line/M4:
       liver. Tolerating sacituzumab at 7.5 mg/kg.'
 questions/disagree/Tumor size at surgery:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: --screening mammogram [4/14/2015] = left breast mass ===> L lumpectomy + sentinel LN bx [5/6/2015] = 2.1 cm invasive ductal carcinoma,
       1/3 LN+, ER 95%, PR 60%, HER2 1+ (Dr. Maya Lindqvist)
 questions/gaps/Echocardiogram:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> adjuvant AC --> paclitaxel: doxorubicin + cyclophosphamide every 2 weeks x4 6/2015 - 8/2015, then paclitaxel weekly x12 8/2015
       - 11/2015'
 emergency/diagnosis:
   src:
-  - doc: ex00000007
-    quote: 'History of Present Illness: Follow-up for metastatic HR+/HER2- breast cancer (bone and liver). Sacituzumab govitecan cycle 3. Neutropenia
-      grade 3 after cycle 2 (ANC 0.8 on 11/17/2025); growth factor added, dose reduced to 7.5 mg/kg.'
+  - doc: ex00000012
+    quote: 'Treatment Plan: Sacituzumab govitecan 10 mg/kg D1,8 Q21D Cycle Length: 21 Number Cycles: 99 Start: C1D1 on 10/06/2025 Assoc Dx: metastatic
+      breast cancer'
 emergency/past:
   src:
   - doc: ex00000003
@@ -353,11 +416,12 @@ emergency/past:
       daily, days 1-14 every 21 days, after liver progression on fulvestrant + alpelisib.'
 emergency/med/Sacituzumab govitecan:
   src:
-  - doc: ex00000001
-    quote: 'Provider: Owen Tremblay, MD Follow-up on sacituzumab govitecan, cycle 12 day 1. Tolerating treatment; diarrhea controlled with loperamide.'
+  - doc: ex00000012
+    quote: 'PROGRESSION: CT [8/26/2025] = liver progression ===> sacituzumab govitecan 10 mg/kg days 1 and 8 q21 days: from 10/6/2025 (Dr. Owen
+      Tremblay)'
 emergency/med/Denosumab:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole + palbociclib 125 mg (3 weeks on / 1 off): 3/15/2021 - 6/1/2023; denosumab 120 mg monthly from 3/15/2021'
 emergency/med/Loperamide:
   src:
@@ -365,40 +429,39 @@ emergency/med/Loperamide:
     quote: 'Provider: Owen Tremblay, MD Follow-up on sacituzumab govitecan, cycle 12 day 1. Tolerating treatment; diarrhea controlled with loperamide.'
 emergency/team/Radiation oncologist:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> whole breast radiation [50 Gy / 25 fx]: 12/7/2015 - 1/8/2016 (Dr. Priya Raman)'
 narrative/in-brief-left-breast-invasive-ductal-carcinoma-d:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: --screening mammogram [4/14/2015] = left breast mass ===> L lumpectomy + sentinel LN bx [5/6/2015] = 2.1 cm invasive ductal carcinoma,
       1/3 LN+, ER 95%, PR 60%, HER2 1+ (Dr. Maya Lindqvist)
 narrative/diagnosis-4-2015-screening-mammogram-4-14-2015-l:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: --screening mammogram [4/14/2015] = left breast mass ===> L lumpectomy + sentinel LN bx [5/6/2015] = 2.1 cm invasive ductal carcinoma,
       1/3 LN+, ER 95%, PR 60%, HER2 1+ (Dr. Maya Lindqvist)
 narrative/metastatic-recurrence-2-2021-pet-2-18-2021-t10-a:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole 2.5 mg daily 2/2018 - 2/2021 (adjuvant) METASTATIC RECURRENCE: PET [2/18/2021] = new T10 and right iliac bone lesions'
 narrative/now-9-2026-on-sacituzumab-govitecan-at-7-5mg-kg:
   src:
   - doc: ex00000001
     quote: 'Provider: Owen Tremblay, MD Follow-up on sacituzumab govitecan, cycle 12 day 1. Tolerating treatment; diarrhea controlled with loperamide.'
-  - doc: ex00000007
-    quote: 'History of Present Illness: Follow-up for metastatic HR+/HER2- breast cancer (bone and liver). Sacituzumab govitecan cycle 3. Neutropenia
-      grade 3 after cycle 2 (ANC 0.8 on 11/17/2025); growth factor added, dose reduced to 7.5 mg/kg.'
+  - doc: ex00000017
+    quote: Infusion Visit Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered 09/21/2026. Premedications given. Tolerated without reaction.
 narrative/3-2021-6-2023-letrozole-palbociclib-progression:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '===> letrozole + palbociclib 125 mg (3 weeks on / 1 off): 3/15/2021 - 6/1/2023; denosumab 120 mg monthly from 3/15/2021'
 narrative/6-2023-5-2024-fulvestrant-alpelisib-progression:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: '--liquid bx [5/30/2023] = PIK3CA H1047R, ESR1 not detected ===> fulvestrant 500 mg monthly + alpelisib 300 mg daily: 6/20/2023 - 5/20/2024'
 narrative/6-2024-9-2025-capecitabine-750mg-m2-from-11-2024:
   src:
-  - doc: ex00000009
+  - doc: ex00000012
     quote: --hand-foot syndrome grade 2 [11/5/2024] --> capecitabine 750 mg/m2
 narrative/10-2025-now-sacituzumab-govitecan-7-5mg-kg-from:
   src:

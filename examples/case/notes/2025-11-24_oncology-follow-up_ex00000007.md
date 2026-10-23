@@ -70,6 +70,7 @@ WBC x 10^3/uL 4.4 2.1
 Neu # (ANC) x 10^3/uL 2.6 0.8
 HGB g/dL 11 10.9
 PLT x 10^3/uL 188 176
-
+Treatment Plan:
+Sacituzumab govitecan 10 mg/kg D1,8 Q21D Cycle Length: 21 Number Cycles: 99 Start: C1D1 on 10/06/2025 Assoc Dx: metastatic breast cancer
 Plan: see the history above.
 Electronically signed by: Owen Tremblay, MD

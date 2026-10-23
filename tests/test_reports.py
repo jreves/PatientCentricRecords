@@ -19,7 +19,9 @@ def test_example_reads_only_its_own_notes(example):
     assert example.notes == EXAMPLE / "notes"
     from reports import labs
     data, used = labs.parse()
-    assert used == 8 and data["WBC"]["2026-09-16"] == 3.9 and data["ANC"]["2025-11-17"] == 0.8
+    assert used == 11 and data["WBC"]["2026-09-14"] == 5.2 and data["ANC"]["2025-11-17"] == 0.8
+    chem, _ = labs.parse({"ALT": [r"ALT/SGPT", r"U/L"], "RBC": r"RBC\b"})   # rows with their own unit, and the default unit
+    assert chem["ALT"]["2026-08-10"] == 41 and chem["RBC"]["2026-08-31"] == 3.7
 
 
 def test_yaml_dates_and_today_resolved(example):

@@ -17,12 +17,16 @@ def notes():
     return common.case().notes
 
 
-def parse():
-    """{test: {iso_date: value}} plus the number of notes that contributed."""
+def parse(tests=None):
+    """{test: {iso_date: value}} plus the number of notes that contributed.
+
+    tests: {key: pattern} (rows whose unit matches ``labs.units_pattern``) or {key: [pattern, unit pattern]}; default the
+    case's ``labs.tests``, else the four blood counts."""
     cfg = common.case().get("labs", {})
-    tests = cfg.get("tests", DEFAULT_TESTS)
+    tests = tests or cfg.get("tests", DEFAULT_TESTS)
     header = cfg.get("header", "LabResults")
     units = cfg.get("units_pattern", r"(?:x 10\^\d/uL|g/dL)")
+    tests = {k: (v, units) if isinstance(v, str) else tuple(v) for k, v in tests.items()}
     out = {k: {} for k in tests}
     used = 0
     for f in sorted(notes().glob("*.md")):
@@ -40,8 +44,8 @@ def parse():
             for row in lines[i + 1:i + 30]:
                 if row.startswith(header):
                     break
-                for key, pat in tests.items():
-                    m = re.match(pat + r"[^\d]*?" + units + r"\s+(.*)$", row)
+                for key, (pat, unit) in tests.items():
+                    m = re.match(pat + r"[^\d]*?" + unit + r"\s+(.*)$", row)
                     if not m:
                         continue
                     vals = [float(v) for v in VAL.findall(m.group(1))]

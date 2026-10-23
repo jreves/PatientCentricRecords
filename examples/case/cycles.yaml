@@ -1,0 +1,27 @@
+# EXAMPLE (fictional): the chemotherapy cycles report. Start from `python -m reports cycles --case examples/case --discover`,
+# which proposes the regimen and its infusion records from the notes; review them, then add what the notes say about doses,
+# holds and side effects. Every statement is cited in citations.yaml.
+cycles:
+  - drug: Sacituzumab govitecan
+    schedule: {length: 21, days: [1, 8]}   # dose days within a cycle of `length` days
+    start: 2025-10-06                      # cycle 1 day 1; cycle numbers count from here
+    day1: [2025-11-24]                     # a cycle that started late (cycle 3, a week after schedule); later cycles follow it
+    doses:                                 # [from, dose level]
+      - [2025-10-06, 10 mg/kg]
+      - [2025-11-24, '7.5 mg/kg, from cycle 3']
+    infusion_records_from: 2026-08-03      # the infusion records start here: earlier doses show as "not confirmed"
+    infusions:                             # doses given, one per infusion record; a scheduled dose with none was not given
+      - {date: 2026-08-03, dose: 7.5 mg/kg (490 mg)}
+      - {date: 2026-08-10, dose: 7.5 mg/kg (490 mg)}
+      - {date: 2026-08-24, dose: 7.5 mg/kg (490 mg)}
+      - {date: 2026-09-14, dose: 7.5 mg/kg (490 mg)}
+      - {date: 2026-09-21, dose: 7.5 mg/kg (490 mg)}
+    not_given:                             # [date, why], when a note says
+      - [2026-08-31, 'held for ANC 0.9; growth factor given']
+    side_effects:                          # [date, what the notes record]
+      - [2025-11-17, 'Grade 3 neutropenia after cycle 2 (ANC 0.8); growth factor added and the dose reduced to 7.5 mg/kg.']
+      - [2026-08-24, 'Mild fatigue for 2-3 days after each dose in cycle 15; no diarrhea or fever.']
+      - [2026-09-14, 'Mild nausea, controlled with ondansetron.']
+      - [2026-09-28, 'Mild hair thinning; no fever.']
+    symptom_log:                           # the family's own notes between visits (cited as family reports)
+      - [2026-08-27, 'Temperature 100.4 °F one evening, normal by morning; the clinic advised watching it.']

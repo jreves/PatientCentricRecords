@@ -213,6 +213,29 @@ def counts_claims():
     return out
 
 
+def cycle_claims():
+    out = []
+    for r in C.get("cycles", []):
+        drug, s = r["drug"], r["schedule"]
+        days = ", ".join(map(str, s["days"]))
+        out.append(claim(f"cycles/{drug}/schedule", "Chemotherapy cycles", f"{drug} schedule",
+                         f"{drug}: days {days} of a {s['length']}-day cycle, cycle 1 day 1 on {fmt(r['start'])}", iso_dates((r["start"], False))))
+        for d, label in r.get("doses", []):
+            out.append(claim(f"cycles/{drug}/dose/{d}", "Chemotherapy cycles", f"{drug} {label}", f"{drug} from {fmt(d)}: {label}", [(d, False)]))
+        for x in r.get("infusions") or []:
+            out.append(claim(f"cycles/{drug}/infusion/{x['date']}", "Chemotherapy cycles", f"{fmt(x['date'])} {drug} given",
+                             f"{drug} given {fmt(x['date'])}" + (f": {x['dose']}" if x.get("dose") else ""), [(x["date"], False)]))
+        for d, why in r.get("not_given", []):
+            out.append(claim(f"cycles/{drug}/not_given/{d}", "Chemotherapy cycles", f"{fmt(d)} {drug} not given", f"{drug} not given {fmt(d)}: {why}", [(d, False)]))
+        for d in r.get("day1", []):
+            out.append(claim(f"cycles/{drug}/day1/{d}", "Chemotherapy cycles", f"{fmt(d)} cycle day 1", f"{drug} cycle day 1 on {fmt(d)}", [(d, False)]))
+        for d, text in r.get("side_effects", []) + r.get("symptom_log", []):
+            out.append(claim(f"cycles/{drug}/effect/{d}", "Chemotherapy cycles", f"{fmt(d)} side effect", text, [(d, False)]))
+        for d, text in r.get("planned", []):
+            out.append(claim(f"cycles/{drug}/planned/{d}", "Chemotherapy cycles", f"Planned: {d}", text))
+    return out
+
+
 def overview_claims():
     out, O = [], C.get("overview", {})
     for s in O.get("sites", []):
@@ -327,7 +350,7 @@ def narrative_claims():
 
 
 def all_claims():
-    return (therapy_claims() + event_claims() + table_claims() + pathology_claims() + counts_claims() + overview_claims()
+    return (therapy_claims() + event_claims() + table_claims() + pathology_claims() + counts_claims() + cycle_claims() + overview_claims()
             + question_claims() + emergency_claims() + chart_claims() + narrative_claims())
 
 
@@ -597,7 +620,7 @@ def derived():
     return out
 
 
-AREA_ORDER = ["Treatments", "Treatments table", "Doses", "Side effects", "Pathology", "Imaging", "Events", "Implants", "Disease sites",
+AREA_ORDER = ["Treatments", "Treatments table", "Doses", "Chemotherapy cycles", "Side effects", "Pathology", "Imaging", "Events", "Implants", "Disease sites",
               "Treatment lines", "Medications", "Emergency summary", "Open questions", "Chart", "Narrative"]
 STATUS = {"broken": ("Citation problem", "#b42318"), "partial": ("Partly grounded", "#b54708"), "unsourced": ("No source yet", "#6b7280"),
           "family": ("Family report", "#3b5bdb"), "grounded": ("Grounded", "#067647")}

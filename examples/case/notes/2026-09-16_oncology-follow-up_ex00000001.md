@@ -23,10 +23,10 @@ Vitals:
 Weight: 143 lb, Pain Scale: 1
 Karnofsky: 80%
 
-LabResults 09/02/2026 09/16/2026
-WBC x 10^3/uL 4.6 3.9 (L)
-Neu # (ANC) x 10^3/uL 2.4 1.8
-HGB g/dL 11.4 11.1 (L)
-PLT x 10^3/uL 214 196
+LabResults 09/14/2026 09/07/2026
+WBC x 10^3/uL 5.2 3.8 (L)
+Neu # (ANC) x 10^3/uL 3.3 2.1
+HGB g/dL 11.3 (L) 10.9 (L)
+PLT x 10^3/uL 207 171
 
 Plan: proceed with cycle 12. CA 27-29 47 U/mL on 9/15/2026, stable.

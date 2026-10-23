@@ -2,8 +2,9 @@
 
     python examples/make_notes.py
 
-The notes use the layout the report readers expect: a "LabResults <dates>" table, vital-sign lines and a
-"Medications:" block, in the same shape as an oncology EHR visit note after de-identification.
+The notes use the layout the report readers expect: a "LabResults <dates>" table, vital-sign lines, a "Medications:"
+block and a treatment-plan line, in the same shape as an oncology EHR visit note after de-identification; and infusion
+visit notes, one per dose given, for the chemotherapy cycles report.
 """
 import pathlib
 
@@ -62,7 +63,7 @@ HISTORY = [
     ("2026-08-25", "--CT [8/25/2026] = stable"),
 ]
 
-# (id, date, provider, story, labs {date: (WBC, ANC, HGB, PLT)}, weight lb, Karnofsky, pain, medicines)
+# (id, date, provider, story, labs {date: (WBC, ANC, HGB, PLT[, RBC, ALT, AST])}, weight lb, Karnofsky, pain, medicines)
 VISITS = [
     ("ex00000003", "2024-06-03", "Owen Tremblay, MD", "Starting capecitabine 1000 mg/m2 twice daily, days 1-14 every 21 days, after liver "
      "progression on fulvestrant + alpelisib.", {"2024-05-20": (6.1, 3.9, 12.8, 241), "2024-06-03": (5.8, 3.6, 12.6, 236)}, 152, 90, 1,
@@ -88,13 +89,35 @@ VISITS = [
     ("ex00000009", "2026-05-11", "Owen Tremblay, MD", "Stable on sacituzumab. Mild fatigue.",
      {"2026-04-27": (4.6, 2.7, 11.3, 199), "2026-05-11": (4.9, 3.0, 11.5, 204)}, 145, 80, 1,
      ["Ondansetron Oral 8 mg every 8 hours as needed", "Loperamide Oral 2 mg as needed", "Omeprazole Oral 20 mg daily"]),
+    # Weekly labs through cycles 15-17 (day 1 = 8/3, 8/24, 9/14/2026), with red cells and liver tests, for the cycles report.
+    ("ex00000010", "2026-08-24", "Owen Tremblay, MD", "Cycle 16 day 1. After cycle 15 she had mild fatigue for 2-3 days after each "
+     "dose; no diarrhea or fever.", {"2026-08-03": (5.0, 3.1, 11.4, 205, 3.90, 24, 27), "2026-08-10": (3.6, 1.9, 11.0, 172, 3.80, 41, 38),
+                                     "2026-08-17": (2.9, 1.3, 10.6, 160, 3.70, 36, 33), "2026-08-24": (4.7, 2.8, 11.2, 198, 3.85, 26, 28)},
+     144, 80, 1, ["Ondansetron Oral 8 mg every 8 hours as needed", "Loperamide Oral 2 mg as needed", "Omeprazole Oral 20 mg daily"]),
+    ("ex00000011", "2026-09-14", "Owen Tremblay, MD", "Cycle 17 day 1. The cycle 16 day 8 dose on 8/31/2026 was held for ANC 0.9; "
+     "growth factor given. Mild nausea, controlled with ondansetron.",
+     {"2026-08-24": (4.7, 2.8, 11.2, 198, 3.85, 26, 28), "2026-08-31": (2.4, 0.9, 10.7, 150, 3.70, 35, 31),
+      "2026-09-07": (3.8, 2.1, 10.9, 171, 3.75, 29, 27), "2026-09-14": (5.2, 3.3, 11.3, 207, 3.90, 23, 25)},
+     144, 80, 1, ["Ondansetron Oral 8 mg every 8 hours as needed", "Loperamide Oral 2 mg as needed", "Omeprazole Oral 20 mg daily"]),
+    ("ex00000012", "2026-09-28", "Owen Tremblay, MD", "Cycle 17 day 15 lab check. Tolerating treatment; mild hair thinning; no fever.",
+     {"2026-09-14": (5.2, 3.3, 11.3, 207, 3.90, 23, 25), "2026-09-21": (3.4, 1.6, 10.8, 168, 3.80, 39, 36),
+      "2026-09-28": (3.0, 1.4, 10.5, 158, 3.70, 33, 31)},
+     144, 80, 1, ["Ondansetron Oral 8 mg every 8 hours as needed", "Loperamide Oral 2 mg as needed", "Omeprazole Oral 20 mg daily"]),
 ]
+
+# Infusion visit notes: one per dose given (the cycle 16 day 8 dose was held, so it has none).
+INFUSIONS = [("ex00000013", "2026-08-03"), ("ex00000014", "2026-08-10"), ("ex00000015", "2026-08-24"),
+             ("ex00000016", "2026-09-14"), ("ex00000017", "2026-09-21")]
+PLAN = ("Treatment Plan:\nSacituzumab govitecan 10 mg/kg D1,8 Q21D Cycle Length: 21 Number Cycles: 99 Start: C1D1 on 10/06/2025 "
+        "Assoc Dx: metastatic breast cancer")
 
 
 def table(labs):
     dates = sorted(labs, reverse=True)
     mdy = lambda d: f"{d[5:7]}/{d[8:10]}/{d[:4]}"
     rows = [("WBC x 10^3/uL", 0), ("Neu # (ANC) x 10^3/uL", 1), ("HGB g/dL", 2), ("PLT x 10^3/uL", 3)]
+    if all(len(labs[d]) > 4 for d in dates):
+        rows += [("RBC x 10^6/uL", 4), ("ALT/SGPT U/L", 5), ("AST/SGOT U/L", 6)]
     return "\n".join([f"LabResults {' '.join(mdy(d) for d in dates)}"] + [f"{name} {' '.join(f'{labs[d][i]:g}' for d in dates)}" for name, i in rows])
 
 
@@ -122,7 +145,7 @@ Karnofsky: {kps}%
 
 Labs:
 {table(labs)}
-
+{PLAN if date >= "2025-10-06" else ""}
 Plan: see the history above.
 Electronically signed by: {provider}
 """
@@ -137,9 +160,19 @@ Discharged 2/14/2025, improved.
 Blood Type ABO/Rh: O POS
 """
 
+def infusion(id, date):
+    mdy = f"{date[5:7]}/{date[8:10]}/{date[:4]}"
+    return HEADER.format(id=id, date=date, type="infusion", age=58, mdy=mdy, provider="Example Cancer Center infusion nurse") + f"""
+Infusion Visit
+Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered {mdy}. Premedications given. Tolerated without reaction.
+"""
+
+
 if __name__ == "__main__":
     NOTES.mkdir(parents=True, exist_ok=True)
     for v in VISITS:
         (NOTES / f"{v[1]}_oncology-follow-up_{v[0]}.md").write_text(visit(*v), encoding="utf-8")
     (NOTES / "2025-02-11_inpatient-summary_ex00000002.md").write_text(HOSPITAL, encoding="utf-8")
-    print(f"wrote {len(VISITS) + 1} fictional notes to {NOTES}")
+    for id, date in INFUSIONS:
+        (NOTES / f"{date}_infusion_{id}.md").write_text(infusion(id, date), encoding="utf-8")
+    print(f"wrote {len(VISITS) + 1 + len(INFUSIONS)} fictional notes to {NOTES}")

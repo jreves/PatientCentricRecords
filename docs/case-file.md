@@ -181,6 +181,33 @@ not on the visit lists; `current: [names]` from the family's current list (it wi
 - Optional `usage_years: [from, to]` and `usage_adjust: [[year, metric, delta]]`; `usage_title`.
 - Texts: `overview_sites`, `overview_lines`, `overview_usage`.
 
+## Chemotherapy cycles (`cycles.yaml`)
+
+`cycles:` lists regimens given in cycles (a drug on set days of a repeating cycle), one cycles report each
+(`cycles_<drug>_<date>.pdf`). Start with `python -m reports cycles --discover`: it reads the notes' treatment-plan and
+history lines ("D1,8,15 Q28D ... Start: C1D1 on ...", "[day 1, 8, 15] q28 days: initiated ...") and writes
+`cycles.suggested.yaml` beside the case, with each regimen's schedule, first day 1, end, the notes it came from, any
+other interval the notes state (a mismatch to ask about), how many lab draws fall on scheduled days, and the infusion
+notes it found. Review it before copying entries in. Other EHRs' wording can be added as `cycles_discovery: patterns`
+(regular expressions with the groups `drug`, `days`, `len`, `start`, and `initiated` for a history line).
+
+Each regimen:
+- `drug`, `schedule: {length, days}` (dose days within a cycle of `length` days), `start` (cycle 1 day 1; cycle
+  numbers count from it), optional `end` (else ongoing), and `report: false` to skip it.
+- `day1: [dates]`: cycles that started early or late; later cycles follow each one.
+- `doses: [[from, dose level]]`.
+- `infusions: [{date, dose, note}]`, one per infusion or administration record (`note`, e.g. "family report", is shown beside the dose). **With this list, a scheduled dose that has
+  no record is shown as not given.** Without it, doses are "not confirmed", never given.
+  `infusion_records_from: date` when the records start partway through: earlier doses stay "not confirmed".
+- `not_given: [[date, why]]`, when a note says why a dose was held.
+- `side_effects: [[date, text]]` from the notes, and `symptom_log: [[date, text]]`, the family's own notes between
+  visits (cite them as family reports).
+- `planned: [[when, text]]`: upcoming events from the plan (the next scheduled doses are added automatically).
+
+Lab values come from the notes' lab tables, as for `blood_counts` (a value is used only from a complete row), and
+the marker from `tumor_marker`. `cycles_tests: {KEY: [label, unit, low, high, grades, row pattern, unit pattern]}`
+overrides a test's range or its row in another lab format (`null` keeps a field). Grades are CTCAE v5.0 cut-offs.
+
 ## Citations and the source audit (`citations.yaml`)
 
 Before the reports go to a new physician, the family should be able to say where each statement comes from.

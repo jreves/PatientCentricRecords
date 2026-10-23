@@ -1,8 +1,9 @@
 """python -m reports build [--case DIR] [--out DIR] [--only NAME ...] [--no-audit]
        python -m reports audit [--suggest] [--no-semantic]
+       python -m reports cycles --discover
 
 Builds every report from the case file. Reports: timelines (interactive pages, full timeline, chart pack, chart PDFs),
-treatments, pathology, blood_counts, emergency, overview, medications, vitals, questions."""
+treatments, pathology, blood_counts, cycles, emergency, overview, medications, vitals, questions."""
 import argparse
 import importlib
 import os
@@ -10,7 +11,7 @@ import sys
 
 REPORTS = {
     "timelines": "timeline", "treatments": "treatments_table", "pathology": "pathology", "blood_counts": "blood_counts",
-    "emergency": "emergency", "overview": "overview", "medications": "medications", "vitals": "vitals", "questions": "questions",
+    "cycles": "cycles",    "emergency": "emergency", "overview": "overview", "medications": "medications", "vitals": "vitals", "questions": "questions",
 }
 
 
@@ -30,6 +31,10 @@ def main(argv=None):
     au.add_argument("--notes", help="published notes directory")
     au.add_argument("--no-semantic", action="store_true", help="skip the local-model reading of each claim")
     au.add_argument("--suggest", action="store_true", help="propose sources for unsourced claims (citations.suggested.yaml)")
+    cy = sub.add_parser("cycles", help="chemotherapy cycles: propose regimens from the notes")
+    cy.add_argument("--case", help="case directory (default: analysis/case, or $PCR_CASE)")
+    cy.add_argument("--notes", help="published notes directory")
+    cy.add_argument("--discover", action="store_true", help="write cycles.suggested.yaml in the case folder, for review")
     a = ap.parse_args(argv)
     if getattr(a, "case", None):
         os.environ["PCR_CASE"] = a.case
@@ -39,6 +44,13 @@ def main(argv=None):
         os.environ["PCR_NOTES"] = a.notes
     from . import common
     c = common.case()
+    if a.cmd == "cycles":
+        from . import cycles
+        if a.discover:
+            cycles.discover()
+        else:
+            cy.print_help()
+        return 0
     if a.cmd == "audit":
         from . import audit
         if a.suggest:

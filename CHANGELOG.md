@@ -4,6 +4,14 @@
 
 - **Documentation:** a getting-started guide (Windows, macOS, Linux), a routine for new records, a guide to the source
   audit, an architecture overview with a diagram, troubleshooting and FAQ, CONTRIBUTING and SECURITY.
+- **Chemotherapy cycles report** (`cycles`): the latest completed cycle by day of cycle (blood counts, red cells, liver
+  tests, the tumour marker, CTCAE grades), the cycle in progress beside it, every cycle as a day-by-day calendar of
+  doses given, not given, not confirmed or expected, the same tests overlaid cycle over cycle, and a summary table
+  with side effects and a family symptom log. A scheduled dose counts as given only when an infusion record lists it.
+  `python -m reports cycles --discover` proposes regimens and infusion records from the notes. The example case
+  shows it with a held dose and a late cycle.
+- **Subfolders:** each source folder is read recursively (a portal download often unpacks into a subfolder).
+- **Leak check:** `pipeline verify` no longer mistakes the pipeline's own all-digit document ids for record numbers.
 - **Gathering records:** a guide to which portal records are worth downloading, and how detailed.
 - **Image files:** PNG, JPEG and TIFF (one page per frame) are read with OCR in sources with `ocr = true`, so a report
   that exists only as a screenshot can be used. Screenshots are enlarged before recognition. "XR"/"XRAY" reports are

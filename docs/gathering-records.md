@@ -50,7 +50,8 @@ question for the care team.
 - **Treatment plans or regimen pages:** drug, dose (for example mg/m²), days given, cycle length, start date. They
   are often a separate page or section in an oncology portal.
 - **Infusion or medication administration records:** what was actually given and when, including holds and dose
-  reductions.
+  reductions. The chemotherapy cycles report counts a dose as given only when one of these shows it. Some portals put
+  them in each visit summary's "Administered medications" section, so download the summary for every infusion day.
 - **Radiation treatment summaries:** site, total dose, number of fractions, and dates.
 - **Prescription histories** from pharmacy portals, for oral cancer drugs and supportive medicines.
 

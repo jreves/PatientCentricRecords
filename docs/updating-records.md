@@ -51,6 +51,7 @@ Things to expect and check:
 | **New events and results** | added to the case, each with a citation |
 | **Facts you reported that a record now documents** | switched from "family report" to the record. For example, a vaccine you mentioned now appears on a pharmacy printout. |
 | **Contradictions** | a new note may disagree with an old one, or carry an old note's text forward word for word. These become **open questions** for the care team rather than silent edits. |
+| **New infusion days** | each infusion record adds a dose to the chemotherapy cycles report; a scheduled day with no record shows as not given. If a record is wrong (a dose you know was given), say so: it goes in as a family report |
 | **Dates** | `dates.records_through` in `analysis/case/case.yaml` moves to the newest record, and `built` to today |
 | **Your current medication list** | when you send a new one, its "Updated" date becomes the date it's authoritative from (`audit: authoritative:` in the case) |
 

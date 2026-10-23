@@ -31,6 +31,14 @@ def test_cycles_follow_the_schedule_and_a_late_day_1(cy):
     assert [c.start.isoformat() for c in late.cycles] == ["2026-07-01", "2026-08-05", "2026-09-02", "2026-09-30"]
 
 
+def test_the_report_tracks_the_last_four_cycles(cy):
+    reg = regimen(cy, start="2025-11-05")   # 12 cycles by 10/1/2026
+    assert len(reg.cycles) == 12 and [c.n for c in reg.shown] == [9, 10, 11, 12] and reg.shown[-1] is reg.current()
+    assert [c.n for c in regimen(cy, start="2025-11-05", show_cycles=2).shown] == [11, 12]
+    assert "cycles 1–8" in cy.window_title(reg)
+    assert cy.window_title(regimen(cy)).startswith("Every cycle since"), "four or fewer: all of them"
+
+
 def test_dose_statuses(cy):
     unknown = regimen(cy)
     assert {s for c in unknown.cycles[:3] for _, _, s, _ in c.doses()} == {"not confirmed"}

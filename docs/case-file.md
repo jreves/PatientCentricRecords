@@ -194,6 +194,8 @@ notes it found. Review it before copying entries in. Other EHRs' wording can be 
 Each regimen:
 - `drug`, `schedule: {length, days}` (dose days within a cycle of `length` days), `start` (cycle 1 day 1; cycle
   numbers count from it), optional `end` (else ongoing), and `report: false` to skip it.
+- `show_cycles` (default 4, or `cycles_show` for the whole case): how many cycles the calendar, overlays, summary and
+  side effects track, the latest ending with the one in progress. Cycle numbers still count from the first dose.
 - `day1: [dates]`: cycles that started early or late; later cycles follow each one.
 - `doses: [[from, dose level]]`.
 - `infusions: [{date, dose, note}]`, one per infusion or administration record (`note`, e.g. "family report", is shown beside the dose). **With this list, a scheduled dose that has

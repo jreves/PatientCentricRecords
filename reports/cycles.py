@@ -37,6 +37,7 @@ for _k, _v in C.get("cycles_tests", {}).items():
 PANELS = [["WBC", "ANC"], ["RBC"], ["HGB"], ["PLT"], ["ALT", "AST"]]
 SHORT = {"WBC": "White cells", "ANC": "Neutrophils", "ALT": "ALT", "AST": "AST"}   # names in two-series panel titles
 BASELINE_DAYS = 3   # a lab drawn up to this many days before a day 1 (with none on day 1) is that cycle's pre-dose value
+SHOW_CYCLES = 4     # cycles shown in the calendar, overlays, summary and side effects: the latest, ending with the current one
 
 
 def grade(key, v):
@@ -80,6 +81,10 @@ class Regimen:
                 break
             starts.append(nxt)
         self.cycles = [Cycle(self, i + 1, c) for i, c in enumerate(starts)]
+        # the cycles the report tracks: the latest `show_cycles`, ending with the one in progress (numbers still count
+        # from the first dose); a long regimen would otherwise make every page grow without bound
+        n = int(r.get("show_cycles", C.get("cycles_show", SHOW_CYCLES)))
+        self.shown = self.cycles[-n:] if n > 0 else list(self.cycles)
 
     def dose_on(self, d):
         cur = None
@@ -294,7 +299,7 @@ def calendar(reg, data):
         cy, day = reg.assign(D(iso), data["WBC"])
         if cy:
             drawn.setdefault(cy.n, set()).add(day)
-    for i, c in enumerate(reg.cycles):
+    for i, c in enumerate(reg.shown):
         y = top + i * 26
         s.append(f'<text x="{L - 8}" y="{y + 14}" text-anchor="end" font-size="11" font-weight="650" fill="var(--text-primary)">Cycle {c.n}</text>'
                  f'<text x="{L - 8}" y="{y + 24}" text-anchor="end" font-size="8.5" fill="var(--text-secondary)">from {e(common.fmt(c.start.isoformat()))}</text>')
@@ -327,7 +332,7 @@ def calendar(reg, data):
                 gr = grade(k, v)
                 lows.append(f"{k} {v:g} (d{dd}){' G' + str(gr) if gr else ''}")
         s.append(f'<text x="{W - 425}" y="{y + 14}" font-size="9.5" fill="var(--text-primary)">{e(" · ".join(lows) or "no labs")}</text>')
-    H = top + 26 * len(reg.cycles) + 8
+    H = top + 26 * len(reg.shown) + 8
     return f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Every cycle by day">{"".join(s)}</svg>'
 
 
@@ -336,7 +341,7 @@ def overlay(reg, key, data, W=600, H=150):
     L, R, T, B = 46, 70, 26, 22
     x = axis(reg, W, L, R)
     lo, hi = TESTS[key][2], TESTS[key][3]
-    lines = [(c, in_cycle(reg, c, data[key])) for c in reg.cycles]
+    lines = [(c, in_cycle(reg, c, data[key])) for c in reg.shown]
     vmax = max([hi * 1.15] + [v * 1.12 for _, p in lines for _, v, _ in p])
     y = lambda v: T + (H - T - B) * (1 - v / vmax)
     s = [f'<text x="{L}" y="13" font-size="12" font-weight="650" fill="var(--text-primary)">{e(TESTS[key][0])}</text>'
@@ -374,9 +379,18 @@ def overlay(reg, key, data, W=600, H=150):
 
 
 # --- tables and text -----------------------------------------------------------------------------------------------------
+def window_title(reg):
+    """The heading for the tracked cycles, saying how many earlier ones are left out."""
+    a, b = reg.shown[0], reg.shown[-1]
+    if a.n == 1:
+        return f"Every cycle since {common.fmt(a.start.isoformat())}"
+    return (f"The last {len(reg.shown)} cycles ({a.n}–{b.n}, from {common.fmt(a.start.isoformat())}); cycles 1–{a.n - 1} "
+            f"from {common.fmt(reg.start.isoformat())} are not shown")
+
+
 def summary_table(reg, data, effects):
     rows = []
-    for c in reversed(reg.cycles):
+    for c in reversed(reg.shown):
         ds = c.doses()
         given = sum(1 for x in ds if x[2] == "given")
         doses = " ".join(f"D{day}{STATUS_MARK[st]}" for day, _, st, _ in ds)
@@ -480,14 +494,14 @@ def build(r, data):
     p1 = (f'<section class="p"><h1>{e(reg.drug)}: cycle {c.n}, {common.fmt(c.start.isoformat())} – {common.fmt(c.last.isoformat())}'
           f'{" (latest completed cycle)" if cur else ""}</h1><p class="sub">{sub}</p>{warn}{legend}'
           f'<div class="card">{dose_strip(reg, c, cur, effects)}<div class="grid2">{panels}</div></div>'
-          f'<h2>Side effects in cycles {c.n}{" and " + str(cur.n) if cur else ""} (numbered as on the dose rows; all cycles on the '
-          f'summary page)</h2>{effects_list(reg, effects, c, only=(c, cur))}</section>')
+          f'<h2>Side effects in cycles {c.n}{" and " + str(cur.n) if cur else ""} (numbered as on the dose rows; cycles '
+          f'{reg.shown[0].n}–{reg.shown[-1].n} on the summary page)</h2>{effects_list(reg, effects, c, only=(c, cur))}</section>')
     overlays = "".join(f"<div>{overlay(reg, k, data)}</div>" for k in ("ANC", "WBC", "PLT", "HGB", "ALT", "RBC"))
-    p2 = (f'<section class="p"><h2>Every cycle since {common.fmt(r["start"])}</h2>'
+    p2 = (f'<section class="p"><h2>{window_title(reg)}</h2>'
           '<p class="sub">Each row is one cycle, day by day: green = dose given, orange ✕ = not given, grey ? = not confirmed, dashed = '
           'expected; dots under a day = labs drawn; the outlined day is today.</p>'
           f'<div class="card">{calendar(reg, data)}</div>'
-          f'<h2{" class=pb" if len(reg.cycles) > 8 else ""}>The same tests, cycle over cycle</h2><p class="sub">Day of cycle on the axis, one line per cycle: whether the low point '
+          f'<h2{" class=pb" if len(reg.shown) > 8 else ""}>The same tests, cycle over cycle</h2><p class="sub">Day of cycle on the axis, one line per cycle: whether the low point '
           'deepens, or recovery by the next day 1 slows, from one cycle to the next.</p>'
           f'<div class="card"><div class="grid2">{overlays}</div></div></section>')
     log_note = ("" if r.get("symptom_log") else
@@ -496,7 +510,7 @@ def build(r, data):
                 'bruising, and any dose given late, reduced or held fills that in; add it to the case as <code>symptom_log</code> '
                 '(shown as family reports).</p>')
     p3 = (f'<section class="p"><h2>Cycle summary</h2>{summary_table(reg, data, effects)}'
-          f'<h2>Side effects, all cycles</h2>{effects_list(reg, effects, c)}'
+          f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>{effects_list(reg, effects, c, only=reg.shown)}'
           f'<div class="cols"><div><h2>Expected next</h2><ul class="x">{expected_list(reg)}</ul>{log_note}</div>'
           '<div><h2>How to read this</h2><ul class="x">'
           '<li>Grades are the Common Terminology Criteria for Adverse Events (CTCAE v5.0) cut-offs, shown for orientation; the care '

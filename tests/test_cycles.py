@@ -96,3 +96,27 @@ def test_example_report_builds(cy, tmp_path, monkeypatch):
     page = (tmp_path / ".work" / "cycles_sacituzumab_govitecan.html").read_text(encoding="utf-8")
     assert "cycle 16, 8/24/2026" in page and "Infusion records start 8/3/2026" in page
     assert "held for ANC 0.9" in page and "family report" in page and "Cycle 18 day 1: 10/5/2026" in page
+
+
+def test_symptom_log_sheet_round_trips_through_the_pipeline(cy, tmp_path, monkeypatch):
+    """The family's log for the cycle in progress: dates and dose days from the schedule; a filled-in spreadsheet is read
+    back by the pipeline's spreadsheet reader with its dates intact."""
+    import openpyxl
+    from pipeline.chrono import note_date
+    from pipeline.extract import _xlsx_pages
+    from reports import symptom_log
+    monkeypatch.setattr(cy.common, "print_pdf", lambda src, pdf, disclaimer=None: pdf.write_bytes(b"%PDF"))
+    reg = regimen(cy)                                   # cycle 4 from 9/23/2026 is in progress on 10/1
+    files = symptom_log.build(reg, "testdrug")
+    assert [f.suffix for f in files] == [".pdf", ".xlsx"] and "cycle4" in files[1].name
+    html = (tmp_path / ".work" / "symptom_log_testdrug_cycle4.html").read_text(encoding="utf-8")
+    assert "Wed 9/23" in html and "day 15 dose" in html and html.count("<tr") == 1 + 28
+    wb = openpyxl.load_workbook(files[1])
+    ws = wb.active
+    ws.cell(row=8, column=5, value=100.6)               # day 4 (9/26): a temperature, as the family would type it
+    wb.save(files[1])
+    pages = _xlsx_pages(files[1])
+    assert "2026-09-26 | Sat |  | 100.6" in pages[0] and "2026-09-23 | Wed | day 1 dose" in pages[0]
+    d, basis = note_date(pages)
+    assert str(d) == "2026-09-23", basis
+    assert symptom_log.build(regimen(cy, end="2026-08-01"), "x") == [], "no sheet once a regimen has ended"

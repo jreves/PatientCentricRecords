@@ -70,5 +70,8 @@ to a subfolder of `analysis/` if you like.
 - **Keep the original downloads.** The pipeline never changes them, and the family may need to produce an original
   document for a physician.
 - **Back up `Sources/` and `private/` together,** and keep the backup as safe as the records themselves.
+- **Keep the symptom log during chemotherapy.** Each build prints a sheet for the cycle in progress (PDF to print, or
+  the spreadsheet to type into). Bring it to visits, and put the filled-in spreadsheet with the records so the
+  reports can include it.
 - **Bring the open-questions page to the next appointment.** Settled questions move to its "already settled" section,
   so they aren't asked twice.

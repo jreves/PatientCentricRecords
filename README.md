@@ -14,7 +14,8 @@ assistant (Claude) help the family build reports from the de-identified notes:
 - a two-page emergency and travel summary (PDF and an editable Word file);
 - pathology and genomic test results alongside the treatments they informed;
 - blood counts, weight and performance status, and medication timelines;
-- chemotherapy cycles: blood counts and liver tests through each cycle, day by day, with the doses given or held;
+- chemotherapy cycles: blood counts and liver tests through each cycle, day by day, with the doses given or held, and a
+  symptom log sheet for the family to fill in between visits;
 - a list of open questions and discrepancies to raise with the care team;
 - a source audit: every statement in the reports traced to the record note it comes from.
 

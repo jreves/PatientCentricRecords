@@ -13,7 +13,7 @@ drugs, clinicians, prose) comes from the case file.
 | `treatments` | `treatments_table.py` | every cancer treatment by phase (landscape PDF) |
 | `pathology` | `pathology.py` | biomarker and genomic results beside the treatments they informed |
 | `blood_counts` | `blood_counts.py` + `labs.py` | WBC/ANC/hemoglobin/platelets from the notes' lab tables |
-| `cycles` | `cycles.py` + `labs.py` | each chemotherapy cycle: blood counts, liver tests and the marker by day of cycle, doses given or not, side effects, every cycle since the start (`python -m reports cycles --discover` proposes the regimens) |
+| `cycles` | `cycles.py` + `labs.py` | each chemotherapy cycle: blood counts, liver tests and the marker by day of cycle, doses given or not, side effects, every cycle since the start (`python -m reports cycles --discover` proposes the regimens), and the family's symptom log sheet for the cycle in progress (`symptom_log.py`, PDF and spreadsheet) |
 | `vitals` | `vitals.py` | weight, performance status and pain |
 | `medications` | `medications.py` | every drug on the visit medication lists over time |
 | `overview` | `overview.py` | body map of disease sites, treatment-line swimmer chart, hospital use |

@@ -205,6 +205,14 @@ Each regimen:
 - `side_effects: [[date, text]]` from the notes, and `symptom_log: [[date, text]]`, the family's own notes between
   visits (cite them as family reports).
 - `planned: [[when, text]]`: upcoming events from the plan (the next scheduled doses are added automatically).
+- `symptom_log_sheet: false` to skip the log sheet below.
+
+Each build also writes the family's **symptom log** for the cycle in progress, as a printable page
+(`symptom_log_<drug>_cycleN_<date>.pdf`) and a spreadsheet (`symptom_log_<drug>_cycleN.xlsx`): one row per day, with
+the dates and dose days filled in. `symptom_log_sheet: {columns, extra_columns, call_if}` at the top level of the case
+sets its columns (default: temperature, energy, nausea, mouth sores, bowel changes, bleeding or bruising, pain) and
+its "when to call the care team" line. A filled-in spreadsheet put with the records is read like any other record;
+cite its rows for the `symptom_log` entries.
 
 Lab values come from the notes' lab tables, as for `blood_counts` (a value is used only from a complete row), and
 the marker from `tumor_marker`. `cycles_tests: {KEY: [label, unit, low, high, grades, row pattern, unit pattern]}`

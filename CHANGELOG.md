@@ -9,7 +9,9 @@
   doses given, not given, not confirmed or expected, the same tests overlaid cycle over cycle, and a summary table
   with side effects and a family symptom log. A scheduled dose counts as given only when an infusion record lists it.
   `python -m reports cycles --discover` proposes regimens and infusion records from the notes. The example case
-  shows it with a held dose and a late cycle.
+  shows it with a held dose and a late cycle. It tracks the last four cycles (`show_cycles`).
+- **Family symptom log:** each cycles build writes a one-row-per-day log sheet for the cycle in progress, with dates
+  and dose days filled in, as a page to print and a spreadsheet. A filled-in spreadsheet is read back like any record.
 - **Subfolders:** each source folder is read recursively (a portal download often unpacks into a subfolder).
 - **Leak check:** `pipeline verify` no longer mistakes the pipeline's own all-digit document ids for record numbers.
 - **Gathering records:** a guide to which portal records are worth downloading, and how detailed.

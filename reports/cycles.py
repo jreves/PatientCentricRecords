@@ -507,8 +507,9 @@ def build(r, data):
     log_note = ("" if r.get("symptom_log") else
                 '<p class="m">No family symptom log yet. The visit notes record side effects only on visit days, so the days between '
                 'doses, when counts are lowest, are mostly blank. A dated note of fevers, fatigue, nausea, mouth sores, bleeding or '
-                'bruising, and any dose given late, reduced or held fills that in; add it to the case as <code>symptom_log</code> '
-                '(shown as family reports).</p>')
+                'bruising, and any dose given late, reduced or held fills that in. Each build prints a log sheet for the cycle in '
+                'progress (<code>symptom_log_…_cycleN</code>, PDF and spreadsheet); a filled-in spreadsheet put with the records '
+                'is read like any other record, and its entries go in the case as <code>symptom_log</code> (family reports).</p>')
     p3 = (f'<section class="p"><h2>Cycle summary</h2>{summary_table(reg, data, effects)}'
           f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>{effects_list(reg, effects, c, only=reg.shown)}'
           f'<div class="cols"><div><h2>Expected next</h2><ul class="x">{expected_list(reg)}</ul>{log_note}</div>'
@@ -537,6 +538,10 @@ def main():
                f'<body><div class="viz-root print"><div class="wrap">{body}</div></div></body></html>')
         pdf = common.write_and_print(f"cycles_{slug}", doc, f"cycles_{slug}_{C.built}.pdf")
         print("built:", pdf.name, pdf.stat().st_size, "bytes;", len(reg.cycles), "cycles")
+        if r.get("symptom_log_sheet", True):   # the family's log for the cycle in progress (symptom_log.py)
+            from . import symptom_log
+            for f in symptom_log.build(reg, slug):
+                print("built:", f.name)
 
 
 # --- discovery ----------------------------------------------------------------------------------------------------------

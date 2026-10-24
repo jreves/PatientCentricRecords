@@ -13,7 +13,7 @@ from . import common
 
 e = html.escape
 
-COLUMNS = ["Temp (°F)", "Energy (0–3)", "Nausea / vomiting", "Mouth sores", "Bowel changes", "Bleeding / bruising", "Pain"]
+COLUMNS = ["Temp (°F)", "Chills", "Fatigue (0–3)", "Nausea / vomiting", "Loss of appetite", "Bowel changes", "Bleeding / bruising"]
 NOTES = "Other symptoms, extra medicines, notes"
 CALL_IF = ("Call the care team as they have told you to: for example for a fever (often 100.4 °F / 38 °C or higher), chills, "
            "bleeding that won't stop, or vomiting or diarrhea that won't settle.")
@@ -63,8 +63,8 @@ def page(reg, c):
         body.append(f'<tr class="{cls}"><td class="d">{day}</td><td class="d">{wd} {int(iso[5:7])}/{int(iso[8:])}</td>'
                     f'<td class="d dose">{e(dose)}</td>' + "<td></td>" * (len(cols) + 1) + "</tr>")
     return (f'<h1>{e(title(reg, c))}</h1>'
-            f'<p class="sub">{e(common.case().summary)}. One row a day; leave a box blank if there was nothing to note. Energy: '
-            '0 = normal, 1 = tired but managing, 2 = resting much of the day, 3 = in bed most of the day. Bring it to the next '
+            f'<p class="sub">{e(common.case().summary)}. One row a day; leave a box blank if there was nothing to note. Fatigue: '
+            '0 = none, 1 = tired but managing, 2 = resting much of the day, 3 = in bed most of the day. Bring it to the next '
             'visit. To add it to the reports, fill in the spreadsheet version and put it with the records.</p>'
             f'<div class="call">{e(call_if)}</div>'
             f'<table class="log"><thead><tr>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>')

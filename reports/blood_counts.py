@@ -53,7 +53,7 @@ def chart(data):
     y += 80
     top_all = y
     for key, label, unit, lo, hi, grades in PANELS:
-        pts = sorted(data[key].items())
+        pts = [(d, v) for d, v in sorted(data[key].items()) if X0 <= D(d) <= X1]   # only the chart's time window
         h = 142
         vmax = max(hi * 1.08, max(v for _, v in pts) * 1.1)
         vmin = 0

@@ -24,6 +24,22 @@ def test_example_reads_only_its_own_notes(example):
     assert chem["ALT"]["2026-08-10"] == 41 and chem["RBC"]["2026-08-31"] == 3.7
 
 
+def test_lab_values_from_ccda_result_rows(example, tmp_path, monkeypatch):
+    """2026-10-24: visit summaries (C-CDA) list results one per row, with the date; they fill dates the visit-note lab
+    tables don't have. The unit is checked, so a urine WBC isn't read as a blood count."""
+    from reports import labs
+    (tmp_path / "n").mkdir()
+    (tmp_path / "n" / "2026-03-02_outpatient-visit_ab12cd34ef.md").write_text(
+        "RESULTS\nGroup | Component | Quantity | Performed\n"
+        "CBC w/auto diff | WBC 10^3/uL ( 4.8 - 10.8 10^3/uL ) | 3.9 | 2026-03-02\n"
+        "CBC w/auto diff | Neu # (ANC) 10^3/?l ( 1.5 - 6.5 10^3/?l ) | 1.2 | 2026-03-02\n"
+        "CMP | ALT/SGPT U/L ( 14.0 - 59.0 U/L ) | 61 | 2026-03-02\n"
+        "Urinalysis | WBC /HPF ( 0 - 5 /HPF ) | 12 | 2026-03-02\n", encoding="utf-8")
+    monkeypatch.setattr(labs, "notes", lambda: tmp_path / "n")
+    d, used = labs.parse({"WBC": r"WBC\b", "ANC": r"Neu # \(ANC\)", "ALT": [r"ALT/SGPT", r"U/L"]})
+    assert used == 1 and d == {"WBC": {"2026-03-02": 3.9}, "ANC": {"2026-03-02": 1.2}, "ALT": {"2026-03-02": 61.0}}
+
+
 def test_yaml_dates_and_today_resolved(example):
     assert example["tumor_marker"]["values"][0][0] == "2021-03-10"
     current = example["therapy_groups"]["systemic"][-1]

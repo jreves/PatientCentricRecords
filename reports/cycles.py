@@ -410,7 +410,7 @@ def summary_table(reg, data, effects):
         dose = reg.dose_on(c.start) or ""
         rows.append(f'<tr><td class="n"><b>Cycle {c.n}</b><br>{e(common.fmt(c.start.isoformat()))} – {e(common.fmt(c.last.isoformat()))}</td>'
                     f'<td>{e(c.status())}</td><td>{e(doses)}<br><span class="m">{given} of {len(ds)} recorded as given</span></td>'
-                    f'<td>{e(dose)}</td><td>{"<br>".join(lows) or "–"}</td><td>{e(ca_txt)}</td><td>{se or "–"}</td></tr>')
+                    f'<td>{e(dose)}</td><td>{" · ".join(lows) or "–"}</td><td>{e(ca_txt)}</td><td>{se or "–"}</td></tr>')
     return ('<table class="sum"><thead><tr><th>Cycle</th><th>Status</th><th>Doses</th><th>Dose level</th><th>Lowest counts (day), peak ALT</th>'
             f'<th>{e(C["tumor_marker"]["name"])}</th><th>Side effects</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
 
@@ -471,7 +471,7 @@ def build(r, data):
     now = (f"now cycle {cur.n}, day {(reg.today - cur.start).days + 1} ({common.fmt(C.today)})" if cur
            else f"{len(reg.cycles)} cycles, ended {common.fmt(reg.end.isoformat())}")
     sub = (f"{e(C.summary)} · prepared {C.built}. {e(reg.drug)} started {common.fmt(r['start'])}: {sched} of a {reg.length}-day cycle; "
-           f"{now}. Cycle numbers count from the first dose. Lab values are read from the visit notes' lab tables; "
+           f"{now}. Cycle numbers count from the first dose. Lab values are read from the notes' lab results (visit-note tables and visit summaries); "
            f"{e(C['tumor_marker']['name'])} from the case's marker history.")
     warn = ""
     if reg.has_records and reg.records_from > reg.start:
@@ -505,11 +505,10 @@ def build(r, data):
           'deepens, or recovery by the next day 1 slows, from one cycle to the next.</p>'
           f'<div class="card"><div class="grid2">{overlays}</div></div></section>')
     log_note = ("" if r.get("symptom_log") else
-                '<p class="m">No family symptom log yet. The visit notes record side effects only on visit days, so the days between '
-                'doses, when counts are lowest, are mostly blank. A dated note of fevers, fatigue, nausea, mouth sores, bleeding or '
-                'bruising, and any dose given late, reduced or held fills that in. Each build prints a log sheet for the cycle in '
-                'progress (<code>symptom_log_…_cycleN</code>, PDF and spreadsheet); a filled-in spreadsheet put with the records '
-                'is read like any other record, and its entries go in the case as <code>symptom_log</code> (family reports).</p>')
+                '<p class="m">No family symptom log yet. Visit notes record side effects only on visit days, so the days between '
+                'doses, when counts are lowest, are mostly blank. Each build prints a log sheet for the cycle in progress '
+                '(<code>symptom_log_…_cycleN</code>, PDF and spreadsheet); a filled-in spreadsheet put with the records is read like '
+                'any other record, and its entries appear here as family reports.</p>')
     p3 = (f'<section class="p"><h2>Cycle summary</h2>{summary_table(reg, data, effects)}'
           f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>{effects_list(reg, effects, c, only=reg.shown)}'
           f'<div class="cols"><div><h2>Expected next</h2><ul class="x">{expected_list(reg)}</ul>{log_note}</div>'
@@ -517,8 +516,8 @@ def build(r, data):
           '<li>Grades are the Common Terminology Criteria for Adverse Events (CTCAE v5.0) cut-offs, shown for orientation; the care '
           'team decides what they mean for treatment. Liver grades assume a normal baseline.</li>'
           '<li>Normal ranges are typical adult values matched to the lab\'s own high/low flags; the lab\'s exact ranges may differ.</li>'
-          '<li>A value is used only from a complete lab-table row, so a date is never guessed. Neutrophil counts are missing where the '
-          'differential was not done for every date in a table.</li>'
+          '<li>Lab values come from visit-note lab tables (complete rows only, so a date is never guessed) and visit summaries. '
+          'Neutrophil counts are missing where no differential was reported.</li>'
           '<li>A lab drawn up to 3 days before day 1 counts as that cycle\'s pre-dose value ("pre").</li>'
           f'<li>{"A dose is given only when an infusion record shows it." if reg.has_records else "Until infusion records are added, no dose is shown as given."}</li>'
           '</ul></div></div></section>')

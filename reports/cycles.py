@@ -415,18 +415,115 @@ def summary_table(reg, data, effects):
             f'<th>{e(C["tumor_marker"]["name"])}</th><th>Side effects</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
 
 
-def effects_list(reg, effects, c, only=None):
-    """The numbered side effects; ``only``: the cycles to list (the numbers stay those of the full list)."""
-    if not effects:
+LOG_TITLE = re.compile(r"^Symptom log: (?P<drug>.+?), cycle \d+", re.M)
+LOG_ROW = re.compile(r"^\d+ \| (?P<date>\d{4}-\d{2}-\d{2}) \| [A-Z][a-z]{2}\b(?P<rest>.*)$")
+NO = {"no", "none", "-", "n"}   # "no" answers are left out; a 0 on a 0–3 scale is kept (it is an answer)
+
+
+FEVER_F = 100.4   # a temperature at or above this is always named in the summary
+
+
+def family_log(reg):
+    """{iso date: {column header: value}} from the family's symptom log sheets in the published notes (symptom_log.py
+    writes them; the family fills them in and keeps them with the records). Read on every build, so new entries need no
+    case edits. A later sheet wins for the same date. Blank cells and "no" answers are left out."""
+    out = {}
+    for f in sorted(C.notes.glob("*.md")):
+        text = f.read_text(encoding="utf-8")
+        m = LOG_TITLE.search(text)
+        if not m or m.group("drug").strip().lower() != reg.drug.lower():
+            continue
+        head = None
+        for line in text.splitlines():
+            if line.startswith("Day | Date |"):
+                head = [h.strip() for h in line.split(" | ")]
+                continue
+            r = LOG_ROW.match(line)
+            if not (head and r):
+                continue
+            cells = [c.strip() for c in line.split(" | ")]
+            row = {h: v for h, v in zip(head[3:], cells[3:])
+                   if v and v.lower() not in NO and not (h.lower().startswith("dose") and re.fullmatch(r"day \d+ dose", v))}
+            if row:
+                out[r.group("date")] = row
+    return out
+
+
+def _day_list(days):
+    """[8, 9, 10, 12] -> "days 8–10 and 12"."""
+    runs, days = [], sorted(days)
+    for d in days:
+        if runs and d == runs[-1][1] + 1:
+            runs[-1][1] = d
+        else:
+            runs.append([d, d])
+    text = [f"{a}–{b}" if b > a else f"{a}" for a, b in runs]
+    return ("day " if len(days) == 1 else "days ") + (", ".join(text[:-1]) + " and " + text[-1] if len(text) > 1 else text[0])
+
+
+def _label(h):
+    name = re.sub(r"\s*\(.*?\)", "", h).strip()
+    return name.lower() if name[1:].islower() else name
+
+
+def log_summaries(reg, logged):
+    """[(iso date, text)]: one rule-based summary of the family log per cycle the report tracks, dated to the cycle's
+    first logged day. It names the days logged (blank days are not "no symptoms"), the highest temperature (and any at or
+    above FEVER_F), each "yes" symptom, the range of each 0–3 score, and each other entry, with their days."""
+    out = []
+    for c in reg.shown:
+        days = {c.day(D(iso)): row for iso, row in logged.items() if reg.cycle_of(D(iso)) is c}
+        if not days:
+            continue
+        parts, by = [], {}
+        for day, row in days.items():
+            for h, v in row.items():
+                by.setdefault(h, []).append((day, v))
+        for h, vals in by.items():
+            if h.startswith("Temp"):
+                nums = [(d, float(re.sub(r"[^\d.]", "", v))) for d, v in vals if re.search(r"\d", v)]
+                if nums:
+                    d, top = max(nums, key=lambda t: t[1])
+                    fevers = [d for d, t in nums if t >= FEVER_F]
+                    parts.append(f"highest temperature {top:g} °F (day {d})"
+                                 + (f"; fever ≥{FEVER_F:g} °F on {_day_list(fevers)}" if fevers else ""))
+            elif h.lower().startswith("dose"):
+                parts += [f"dose day {d}: {v}" for d, v in vals]
+            elif all(v.lower() in ("yes", "y") for _, v in vals):
+                parts.append(f"{_label(h)} ({_day_list(d for d, _ in vals)})")
+            elif "(0–3)" in h or "(0-3)" in h:
+                nums = [(d, int(v)) for d, v in vals if v.isdigit()]
+                if nums:
+                    lo, hi = min(n for _, n in nums), max(n for _, n in nums)
+                    peak = [d for d, n in nums if n == hi]
+                    parts.append(f"{_label(h)} {lo}–{hi}/3 (highest {_day_list(peak)})" if hi > lo else f"{_label(h)} {hi}/3 ({_day_list(d for d, _ in nums)})")
+            else:
+                groups = {}
+                for d, v in vals:
+                    groups.setdefault(v, []).append(d)
+                for v, ds in groups.items():
+                    lead = "" if h.lower().startswith(("other", "notes")) else f"{_label(h)}: "
+                    parts.append(f"{lead}{v[0].lower() + v[1:] if v[1:2].islower() else v} ({_day_list(ds)})")
+        first = min(iso for iso in logged if reg.cycle_of(D(iso)) is c)
+        out.append((first, f"Cycle {c.n}, {_day_list(days)} logged: " + "; ".join(parts) + "."))
+    return out
+
+
+def effects_list(reg, effects, c, only=None, family=()):
+    """The numbered side effects; ``only``: the cycles to list (the numbers stay those of the full list). ``family``:
+    summaries of the family's symptom log, listed in date order and marked as such rather than numbered."""
+    if not effects and not family:
         return '<p class="m">No side effects are recorded for this regimen.</p>'
     items = []
+    for d, txt in family:
+        items.append((d, f'<li><b>Family log, {e(common.fmt(d))}</b>: {e(txt)}</li>'))
     for i, (d, txt, who) in enumerate(effects):
         cy = reg.cycle_of(D(d))
         if only is not None and cy not in only:
             continue
         where = f"C{cy.n} day {cy.day(D(d))}" if cy else ""
-        items.append(f'<li class="{"hl" if cy is c else ""}"><b>[{i + 1}] {e(common.fmt(d))}</b> ({e(where)}{", " + e(who) if who else ""}): {e(txt)}</li>')
-    return f'<ol class="se">{"".join(items)}</ol>'
+        items.append((d, f'<li class="{"hl" if cy is c else ""}"><b>[{i + 1}] {e(common.fmt(d))}</b> ({e(where)}{", " + e(who) if who else ""}): {e(txt)}</li>'))
+    return f'<ol class="se">{"".join(html for _, html in sorted(items, key=lambda t: t[0]))}</ol>'
 
 
 def expected_list(reg):
@@ -504,13 +601,15 @@ def build(r, data):
           f'<h2{" class=pb" if len(reg.shown) > 8 else ""}>The same tests, cycle over cycle</h2><p class="sub">Day of cycle on the axis, one line per cycle: whether the low point '
           'deepens, or recovery by the next day 1 slows, from one cycle to the next.</p>'
           f'<div class="card"><div class="grid2">{overlays}</div></div></section>')
-    log_note = ("" if r.get("symptom_log") else
+    logged = family_log(reg)
+    log_note = ("" if r.get("symptom_log") or logged else
                 '<p class="m">No family symptom log yet. Visit notes record side effects only on visit days, so the days between '
                 'doses, when counts are lowest, are mostly blank. Each build prints a log sheet for the cycle in progress '
                 '(<code>symptom_log_…_cycleN</code>, PDF and spreadsheet); a filled-in spreadsheet put with the records is read like '
                 'any other record, and its entries appear here as family reports.</p>')
     p3 = (f'<section class="p"><h2>Cycle summary</h2>{summary_table(reg, data, effects)}'
-          f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>{effects_list(reg, effects, c, only=reg.shown)}'
+          f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>'
+          f'{effects_list(reg, effects, c, only=reg.shown, family=log_summaries(reg, logged))}'
           f'<div class="cols"><div><h2>Expected next</h2><ul class="x">{expected_list(reg)}</ul>{log_note}</div>'
           '<div><h2>How to read this</h2><ul class="x">'
           '<li>Grades are the Common Terminology Criteria for Adverse Events (CTCAE v5.0) cut-offs, shown for orientation; the care '

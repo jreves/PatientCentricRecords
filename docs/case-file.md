@@ -212,8 +212,11 @@ Each build also writes the family's **symptom log** for the cycle in progress, a
 the dates and dose days filled in. `symptom_log_sheet: {columns, extra_columns, call_if}` at the top level of the case
 sets its columns (default: temperature, chills, fatigue, nausea or vomiting, loss of appetite, bowel changes, bleeding
 or bruising) and
-its "when to call the care team" line. A filled-in spreadsheet put with the records is read like any other record;
-cite its rows for the `symptom_log` entries.
+its "when to call the care team" line. Keep the filled-in spreadsheet with the records (for example in a
+`family-reports` source): the pipeline publishes it like any other record, and the cycles report reads the published
+sheet on every build and adds a summary of each cycle's log to the side effects, marked "Family log": the days
+logged, the highest temperature (any fever of 100.4 °F or more is named), each "yes" symptom, the range of each 0–3
+score, and other entries, with their days. Nothing needs copying into the case.
 
 Lab values come from the notes' lab tables, as for `blood_counts` (a value is used only from a complete row), and
 the marker from `tumor_marker`. `cycles_tests: {KEY: [label, unit, low, high, grades, row pattern, unit pattern]}`

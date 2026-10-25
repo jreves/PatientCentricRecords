@@ -11,7 +11,9 @@
   `python -m reports cycles --discover` proposes regimens and infusion records from the notes. The example case
   shows it with a held dose and a late cycle. It tracks the last four cycles (`show_cycles`).
 - **Family symptom log:** each cycles build writes a one-row-per-day log sheet for the cycle in progress, with dates
-  and dose days filled in, as a page to print and a spreadsheet. A filled-in spreadsheet is read back like any record.
+  and dose days filled in, as a page to print and a spreadsheet. Kept with the records, the filled-in sheet is read on
+  every build and each cycle's log is summarized by fixed rules into the report's side effects, marked "Family log"
+  (days logged, highest temperature and any fever, symptoms and scores with their days).
 - **Lab values from C-CDA visit summaries:** result rows (one value and date per row) are read alongside visit-note
   lab tables, with the unit checked. The blood-count chart draws only values inside its time window.
 - **Subfolders:** each source folder is read recursively (a portal download often unpacks into a subfolder).

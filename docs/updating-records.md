@@ -71,7 +71,8 @@ to a subfolder of `analysis/` if you like.
   document for a physician.
 - **Back up `Sources/` and `private/` together,** and keep the backup as safe as the records themselves.
 - **Keep the symptom log during chemotherapy.** Each build prints a sheet for the cycle in progress (PDF to print, or
-  the spreadsheet to type into). Bring it to visits, and put the filled-in spreadsheet with the records so the
-  reports can include it.
+  the spreadsheet to type into). Bring it to visits. Keep the spreadsheet in its own records folder (for example
+  `family-reports`, listed in `config/local.toml`) and add to it as you go: each pipeline run and build picks up the
+  new entries.
 - **Bring the open-questions page to the next appointment.** Settled questions move to its "already settled" section,
   so they aren't asked twice.

@@ -168,11 +168,40 @@ Sacituzumab govitecan 7.5 mg/kg IV (490 mg) administered {mdy}. Premedications g
 """
 
 
+# The family's symptom log for cycle 17, filled in and kept with the records, as the pipeline publishes a spreadsheet.
+LOG_DAYS = {2: ["", "99.1", "", "2", "Mild", "Yes", "", "", "tired after the infusion"], 3: ["", "", "", "1", "Mild", "", "", "", ""],
+            4: ["", "", "", "1", "", "", "", "", ""], 8: ["", "", "", "", "", "", "", "", "infusion day"],
+            9: ["", "100.6", "Yes", "2", "", "", "", "", "called the clinic; told to watch it, normal by morning"],
+            10: ["", "98.6", "", "1", "", "", "", "", ""]}
+
+
+def family_log():
+    from datetime import date, timedelta
+    start = date(2026, 9, 14)
+    rows = []
+    for day in range(1, 22):
+        d = start + timedelta(days=day - 1)
+        cells = [str(day), d.isoformat(), d.strftime("%a"), "day %d dose" % day if day in (1, 8) else ""] + LOG_DAYS.get(day, [])[1:]
+        if day in LOG_DAYS and LOG_DAYS[day][0]:
+            cells[3] = LOG_DAYS[day][0]
+        while cells and not cells[-1]:
+            cells.pop()
+        rows.append(" | ".join(cells))
+    return HEADER.format(id="ex00000018", date="2026-09-14", type="spreadsheet", age=58, mdy="09/14/2026",
+                         provider="the family (symptom log)").replace("format: pdf", "format: xlsx") + """
+Sheet: Cycle 17
+Symptom log: Sacituzumab govitecan, cycle 17 (9/14/2026 – 10/4/2026)
+Call the care team as they have told you to: for example for a fever (often 100.4 °F / 38 °C or higher), chills, bleeding that won't stop, or vomiting or diarrhea that won't settle.
+Day | Date | Weekday | Dose: given, held or late? | Temp (°F) | Chills | Fatigue (0–3) | Nausea / vomiting | Loss of appetite | Bowel changes | Bleeding / bruising | Other symptoms, extra medicines, notes
+""" + "\n".join(rows) + "\n"
+
+
 if __name__ == "__main__":
     NOTES.mkdir(parents=True, exist_ok=True)
     for v in VISITS:
         (NOTES / f"{v[1]}_oncology-follow-up_{v[0]}.md").write_text(visit(*v), encoding="utf-8")
     (NOTES / "2025-02-11_inpatient-summary_ex00000002.md").write_text(HOSPITAL, encoding="utf-8")
+    (NOTES / "2026-09-14_spreadsheet_ex00000018.md").write_text(family_log(), encoding="utf-8")
     for id, date in INFUSIONS:
         (NOTES / f"{date}_infusion_{id}.md").write_text(infusion(id, date), encoding="utf-8")
-    print(f"wrote {len(VISITS) + 1 + len(INFUSIONS)} fictional notes to {NOTES}")
+    print(f"wrote {len(VISITS) + 2 + len(INFUSIONS)} fictional notes to {NOTES}")

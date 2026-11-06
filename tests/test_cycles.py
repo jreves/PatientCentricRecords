@@ -36,7 +36,20 @@ def test_the_report_tracks_the_last_four_cycles(cy):
     assert len(reg.cycles) == 12 and [c.n for c in reg.shown] == [9, 10, 11, 12] and reg.shown[-1] is reg.current()
     assert [c.n for c in regimen(cy, start="2025-11-05", show_cycles=2).shown] == [11, 12]
     assert "cycles 1–8" in cy.window_title(reg)
+    assert "cycle 1 (11/5/2025) is not shown" in cy.window_title(regimen(cy, start="2025-11-05", show_cycles=11))
     assert cy.window_title(regimen(cy)).startswith("Every cycle since"), "four or fewer: all of them"
+
+
+def test_a_cycle_can_start_early(cy):
+    """2026-11-06: a dose day was skipped and the next cycle started a week early; the cut-short cycle ends the day
+    before, and its dose days after that are dropped. A listed day 1 replaces the scheduled start it falls nearest."""
+    reg = regimen(cy, start="2026-06-03", day1=["2026-08-19"])   # cycle 4 was due 8/26 and started 8/19
+    assert [c.start.isoformat() for c in reg.cycles[:5]] == ["2026-06-03", "2026-07-01", "2026-07-29", "2026-08-19", "2026-09-16"]
+    assert reg.cycles[2].last.isoformat() == "2026-08-18" and [d for d, *_ in reg.cycles[2].doses()] == [1, 8, 15]
+    short = regimen(cy, start="2026-06-03", day1=["2026-08-16"])   # cycle 3 cut at day 19
+    assert short.cycles[3].start.isoformat() == "2026-08-16" and short.cycles[2].last.isoformat() == "2026-08-15"
+    cut = regimen(cy, start="2026-06-03", day1=["2026-08-12"])     # 8/12 is cycle 3's day 15: that dose is dropped
+    assert cut.cycles[3].start.isoformat() == "2026-08-12" and [d for d, *_ in cut.cycles[2].doses()] == [1, 8]
 
 
 def test_dose_statuses(cy):

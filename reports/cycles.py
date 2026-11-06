@@ -81,6 +81,8 @@ class Regimen:
                 break
             starts.append(nxt)
         self.cycles = [Cycle(self, i + 1, c) for i, c in enumerate(starts)]
+        for a, b in zip(self.cycles, self.cycles[1:]):   # a cycle cut short by an early day 1 ends the day before it
+            a.last = min(a.last, b.start - timedelta(days=1))
         # the cycles the report tracks: the latest `show_cycles`, ending with the one in progress (numbers still count
         # from the first dose); a long regimen would otherwise make every page grow without bound
         n = int(r.get("show_cycles", C.get("cycles_show", SHOW_CYCLES)))
@@ -135,7 +137,7 @@ class Cycle:
         out = []
         for day in self.reg.days:
             d = self.date(day)
-            if d > self.reg.end and not self.reg.ongoing:
+            if d > self.last or (d > self.reg.end and not self.reg.ongoing):
                 continue
             rec = self.reg.given.get(d) or next((v for k, v in self.reg.given.items() if abs((k - d).days) <= 1), None)
             if rec:
@@ -272,8 +274,8 @@ def dose_strip(reg, c, cur, effects, W=1230):
                      f'<text x="{x(day) + 9:.1f}" y="{yy + 15}" font-size="9" fill="var(--text-secondary)">{e(st)}{": " + e(det) if det and st != "expected" else ""}</text>')
         if cy is cur:
             t = (reg.today - cy.start).days + 1
-            s.append(f'<line x1="{x(t):.1f}" x2="{x(t):.1f}" y1="{yy - 12}" y2="{yy + 12}" stroke="var(--series-2)" stroke-width="1.5"/>'
-                     f'<text x="{x(t):.1f}" y="{yy - 15}" text-anchor="middle" font-size="9" fill="var(--series-2)">today, day {t}</text>')
+            s.append(f'<line x1="{x(t):.1f}" x2="{x(t):.1f}" y1="{yy - 12}" y2="{yy + 20}" stroke="var(--series-2)" stroke-width="1.5"/>'
+                     f'<text x="{x(t) + 9:.1f}" y="{yy + 27}" font-size="9" fill="var(--series-2)">today, day {t}</text>')
     row_y = {cy.n: yy for cy, yy in rows}
     for i, (d, txt, _) in enumerate(effects):
         cy = reg.cycle_of(D(d))
@@ -305,6 +307,8 @@ def calendar(reg, data):
                  f'<text x="{L - 8}" y="{y + 24}" text-anchor="end" font-size="8.5" fill="var(--text-secondary)">from {e(common.fmt(c.start.isoformat()))}</text>')
         for day in range(0, reg.length + 1):
             d = c.date(day)
+            if d > c.last:   # the cycle ended early (the next one started): its remaining days are left blank
+                continue
             xx = L + cw * day
             fill, mark = "var(--surface-1)", ""
             dose = next((x for x in c.doses() if x[0] == day), None)
@@ -384,8 +388,8 @@ def window_title(reg):
     a, b = reg.shown[0], reg.shown[-1]
     if a.n == 1:
         return f"Every cycle since {common.fmt(a.start.isoformat())}"
-    return (f"The last {len(reg.shown)} cycles ({a.n}–{b.n}, from {common.fmt(a.start.isoformat())}); cycles 1–{a.n - 1} "
-            f"from {common.fmt(reg.start.isoformat())} are not shown")
+    earlier = f"cycle 1 ({common.fmt(reg.start.isoformat())}) is" if a.n == 2 else f"cycles 1–{a.n - 1} (from {common.fmt(reg.start.isoformat())}) are"
+    return f"The last {len(reg.shown)} cycles ({a.n}–{b.n}, from {common.fmt(a.start.isoformat())}); {earlier} not shown"
 
 
 def summary_table(reg, data, effects):

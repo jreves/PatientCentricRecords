@@ -10,6 +10,8 @@
   with side effects and a family symptom log. A scheduled dose counts as given only when an infusion record lists it.
   `python -m reports cycles --discover` proposes regimens and infusion records from the notes. The example case
   shows it with a held dose and a late cycle. It tracks the last four cycles (`show_cycles`).
+- **Cycles that start early:** a listed day 1 can start a cycle early (after a skipped dose); the cycle before ends
+  the day before, and its later dose days are dropped.
 - **Family symptom log:** each cycles build writes a one-row-per-day log sheet for the cycle in progress, with dates
   and dose days filled in, as a page to print and a spreadsheet. Kept with the records, the filled-in sheet is read on
   every build and each cycle's log is summarized by fixed rules into the report's side effects, marked "Family log"

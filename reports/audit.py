@@ -30,6 +30,7 @@ import html
 import json
 import re
 import urllib.error
+import time
 import urllib.request
 from datetime import date
 from html.parser import HTMLParser
@@ -509,6 +510,7 @@ class Semantic:
         self.cache.mkdir(exist_ok=True)
         self.calls = self.hits = self.bad = 0
         self.ok = True
+        self.problem = ""   # why the check stopped, when it did (never model output)
 
     def check(self, c, ev):
         prompt = SEM_PROMPT.format(claim=c["text"], evidence=ev)
@@ -524,12 +526,9 @@ class Semantic:
                 "messages": [{"role": "user", "content": prompt}], "options": {"temperature": 0, "num_ctx": 8192, "num_predict": 1200}}
         out = None
         for attempt in range(2):   # a malformed answer (e.g. JSON cut off) is retried once, with more room
-            try:
-                req = urllib.request.Request(self.base + "/api/chat", json.dumps(body).encode(), {"Content-Type": "application/json"})
-                with urllib.request.urlopen(req, timeout=600) as r:
-                    raw = json.loads(r.read())["message"]["content"]
-            except (urllib.error.URLError, OSError):
-                self.ok = False   # Ollama not running: the rest of the audit goes on without this check
+            raw = self._ask(body)
+            if raw is None:   # Ollama unavailable after retries: the rest of the audit goes on without this check
+                self.ok = False
                 return None
             try:
                 out = json.loads(raw)
@@ -543,6 +542,36 @@ class Semantic:
             return UNREADABLE
         f.write_text(json.dumps(out), encoding="utf-8")
         return verdict(out)
+
+    RETRY_WAITS = (5, 15, 30)   # seconds: Ollama restarts itself to update, and is briefly unavailable or loading
+
+    def _ask(self, body):
+        """The model's answer text, or None once retries are used up; ``problem`` then says what went wrong. Only the
+        status code and Ollama's own error message are kept, never the request or the model's output."""
+        for wait in (0,) + self.RETRY_WAITS:
+            if wait:
+                time.sleep(wait)
+            try:
+                req = urllib.request.Request(self.base + "/api/chat", json.dumps(body).encode(), {"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=600) as r:
+                    return json.loads(r.read())["message"]["content"]
+            except urllib.error.HTTPError as e:   # Ollama answered, with an error (model loading or missing, bad request)
+                try:
+                    msg = json.loads(e.read() or b"{}").get("error", "")
+                except ValueError:
+                    msg = ""
+                self.problem = f"Ollama answered HTTP {e.code}" + (f": {msg[:120]}" if msg else "")
+                if e.code < 500 and e.code not in (404, 408, 429):   # a request it will never accept: don't retry
+                    return None
+            except urllib.error.URLError as e:
+                self.problem = f"Ollama not reachable at {self.base} ({getattr(e, 'reason', e)})"
+            except TimeoutError:
+                self.problem = "Ollama did not answer within 10 minutes"
+            except OSError as e:
+                self.problem = f"Ollama connection failed ({e.__class__.__name__})"
+            except (KeyError, ValueError):
+                self.problem = "Ollama's reply was not the expected JSON"
+        return None
 
 
 # --- the audit -------------------------------------------------------------------------------------------------------
@@ -644,7 +673,7 @@ def run(semantic=True, log=print):
     if sem:
         v = [r["semantic"]["verdict"] for r in results if r["semantic"]]
         log(f"source audit, local model ({sem.model}): {v.count('supported')} supported, {v.count('partial')} partly, "
-            f"{v.count('unsupported')} not supported" + ("" if sem.ok else " (Ollama not reachable: some claims not checked)")
+            f"{v.count('unsupported')} not supported" + ("" if sem.ok else f" (local-model check stopped: {sem.problem}; some claims not checked)")
             + f"; {sem.calls} new checks, {sem.hits} cached" + (f", {sem.bad} unreadable answers" if sem.bad else ""))
     if stale:
         log(f"source audit: {len(stale)} entries in citations.yaml match no claim (renamed or removed)")

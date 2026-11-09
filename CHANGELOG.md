@@ -18,6 +18,8 @@
   (days logged, highest temperature and any fever, symptoms and scores with their days).
 - **Lab values from C-CDA visit summaries:** result rows (one value and date per row) are read alongside visit-note
   lab tables, with the unit checked. The blood-count chart draws only values inside its time window.
+- **Source audit and Ollama restarts:** local-model trouble is named (connection refused, timeout, or Ollama's HTTP
+  status and message) and transient failures are retried before the check is switched off.
 - **Subfolders:** each source folder is read recursively (a portal download often unpacks into a subfolder).
 - **Leak check:** `pipeline verify` no longer mistakes the pipeline's own all-digit document ids for record numbers.
 - **Gathering records:** a guide to which portal records are worth downloading, and how detailed.

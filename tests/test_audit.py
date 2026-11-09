@@ -92,3 +92,28 @@ def test_angle_brackets_in_notes_are_kept(audit):
     docs["n1"]["norm"] = audit.norm(text, markup=False)
     c = audit.claim("i/1", "Implants", "Tray", "Tibial tray, size 5, uncemented")
     assert audit.audit_claim(c, {"src": [{"doc": "n1", "quote": "tibial tray, size 5"}]}, docs, None)["status"] == "grounded"
+
+
+def test_local_model_trouble_is_named_and_retried(audit, monkeypatch):
+    """2026-11-08: during an Ollama update every failure read "not reachable". Errors are now named (status code and
+    Ollama's own message, never content), and transient ones are retried before the check is switched off."""
+    import io
+    import urllib.error
+    sem = audit.Semantic()
+    monkeypatch.setattr(sem, "RETRY_WAITS", (0, 0))
+    monkeypatch.setattr(audit.time, "sleep", lambda s: None)
+    replies = []
+
+    def fake_urlopen(req, timeout=None):
+        r = replies.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return io.BytesIO(r)
+    monkeypatch.setattr(audit.urllib.request, "urlopen", fake_urlopen)
+    err = lambda code, msg: urllib.error.HTTPError("u", code, "x", {}, io.BytesIO(('{"error": "%s"}' % msg).encode()))
+    replies[:] = [err(503, "loading model"), b'{"message": {"content": "{}"}}']
+    assert sem._ask({}) == "{}", "a 503 while the model loads is retried"
+    replies[:] = [err(400, "unknown option")]
+    assert sem._ask({}) is None and sem.problem == "Ollama answered HTTP 400: unknown option", "a bad request isn't retried"
+    replies[:] = [urllib.error.URLError(ConnectionRefusedError("refused"))] * 3
+    assert sem._ask({}) is None and sem.problem.startswith("Ollama not reachable at http://localhost:11434")

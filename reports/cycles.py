@@ -496,7 +496,8 @@ def log_summaries(reg, logged):
             elif all(v.lower() in ("yes", "y") for _, v in vals):
                 parts.append(f"{_label(h)} ({_day_list(d for d, _ in vals)})")
             elif "(0–3)" in h or "(0-3)" in h:
-                nums = [(d, int(v)) for d, v in vals if v.isdigit()]
+                # a score may be written "1" or "Mild (1)": the 0–3 number is what's summarized
+                nums = [(d, int(m.group(1))) for d, v in vals if (m := re.search(r"\b([0-3])\b", v))]
                 if nums:
                     lo, hi = min(n for _, n in nums), max(n for _, n in nums)
                     peak = [d for d, n in nums if n == hi]

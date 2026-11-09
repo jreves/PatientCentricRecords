@@ -145,17 +145,17 @@ def test_family_log_sheets_are_read_from_the_notes(cy, tmp_path, monkeypatch):
         "Day | Date | Weekday | Dose: given, held or late? | Temp (°F) | Chills | Fatigue (0–3) | Mouth sores | Other symptoms, notes\n"
         "1 | 2026-09-23 | Wed | day 1 dose\n"
         "2 | 2026-09-24 | Thu |  | 100.6 | Yes | 2 | No | called the clinic\n"
-        "3 | 2026-09-25 | Fri |  |  | No | 0\n"
+        "3 | 2026-09-25 | Fri |  |  | No | Mild (1)\n"
         "8 | 2026-09-30 | Wed | held: platelets low\n", encoding="utf-8")
     monkeypatch.setattr(cy.C, "notes", notes)
     reg = regimen(cy)
     log = cy.family_log(reg)
     assert log["2026-09-24"] == {"Temp (°F)": "100.6", "Chills": "Yes", "Fatigue (0–3)": "2", "Other symptoms, notes": "called the clinic"}
-    assert log["2026-09-25"] == {"Fatigue (0–3)": "0"} and log["2026-09-30"] == {"Dose: given, held or late?": "held: platelets low"}
+    assert log["2026-09-25"] == {"Fatigue (0–3)": "Mild (1)"} and log["2026-09-30"] == {"Dose: given, held or late?": "held: platelets low"}
     assert "2026-09-23" not in log, "the printed dose day alone is not an entry"
     assert cy.family_log(regimen(cy, drug="Otherdrug")) == {}, "only the regimen's own sheets"
     # one summary per cycle: the days logged, the highest temperature and any fever, yes-symptoms, score ranges, notes
     (date, text), = cy.log_summaries(reg, log)
     assert date == "2026-09-24" and text.startswith("Cycle 4, days 2–3 and 8 logged:")
     assert "highest temperature 100.6 °F (day 2); fever ≥100.4 °F on day 2" in text and "chills (day 2)" in text
-    assert "fatigue 0–2/3 (highest day 2)" in text and "dose day 8: held: platelets low" in text and "called the clinic (day 2)" in text
+    assert "fatigue 1–2/3 (highest day 2)" in text and "dose day 8: held: platelets low" in text and "called the clinic (day 2)" in text

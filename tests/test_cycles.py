@@ -107,7 +107,7 @@ def test_example_report_builds(cy, tmp_path, monkeypatch):
     monkeypatch.setattr(cy.common, "print_pdf", lambda src, pdf, disclaimer=None: pdf.write_bytes(b"%PDF"))
     cy.main()
     page = (tmp_path / ".work" / "cycles_sacituzumab_govitecan.html").read_text(encoding="utf-8")
-    assert "cycle 16, 8/24/2026" in page and "Infusion records start 8/3/2026" in page
+    assert "Cycle 16, 8/24/2026" in page and page.index("Cycle summary") < page.index("Cycle 16, 8/24/2026") and "Infusion records start 8/3/2026" in page
     assert "held for ANC 0.9" in page and "family report" in page and "Cycle 18 day 1: 10/5/2026" in page
 
 
@@ -159,3 +159,28 @@ def test_family_log_sheets_are_read_from_the_notes(cy, tmp_path, monkeypatch):
     assert date == "2026-09-24" and text.startswith("Cycle 4, days 2–3 and 8 logged:")
     assert "highest temperature 100.6 °F (day 2); fever ≥100.4 °F on day 2" in text and "chills (day 2)" in text
     assert "fatigue 1–2/3 (highest day 2)" in text and "dose day 8: held: platelets low" in text and "called the clinic (day 2)" in text
+
+
+def test_chemistry_grades_and_row_patterns(cy):
+    """Creatinine and bilirubin grade by multiples of the upper limit, albumin by its low cut-offs; urine creatinine and
+    ionized calcium are not read as the blood values."""
+    import re
+    assert cy.grade("CREAT", 1.0) == 0 and cy.grade("CREAT", 1.5) == 1 and cy.grade("CREAT", 2.0) == 2 and cy.grade("CREAT", 4.0) == 3
+    assert cy.grade("BILI", 1.4) == 1 and cy.grade("BILI", 2.0) == 2 and cy.grade("BILI", 4.0) == 3
+    assert cy.grade("ALB", 3.6) == 0 and cy.grade("ALB", 3.4) == 1 and cy.grade("ALB", 2.9) == 2 and cy.grade("ALB", 1.9) == 3
+    assert cy.grade("CALC", 11.0) == 0 and cy.out_of_range("CALC", 11.0) and cy.out_of_range("MCV", 101)
+    m = lambda k, row: re.match(cy.TESTS[k][5] + r"[^\d]*?" + cy.TESTS[k][6], row)
+    assert m("CREAT", "Creatinine, mg/dL mg/dL ( 0.5 - 0.9 mg/dL )") and not m("CREAT", "Creatinine, urine mg/dL")
+    assert m("CALC", "Calcium mg/dL") and not m("CALC", "Calcium, ionized mg/dL")
+    assert m("BILI", "Bilirubin, total mg/dL") and m("BILI", "T. Bili mg/dL") and not m("BILI", "Bilirubin, direct mg/dL")
+    lo, hi = cy.scale("MCV", 80, 100, [93.0, 97.9])
+    assert 70 < lo < 80 and hi > 100   # a narrow-band test is charted around its range, not from 0
+    assert cy.scale("PLT", 150, 400, [160])[0] == 0
+
+
+def test_example_summary_names_high_bilirubin_only(cy, tmp_path, monkeypatch):
+    monkeypatch.setattr(cy.common, "print_pdf", lambda src, pdf, disclaimer=None: pdf.write_bytes(b"%PDF"))
+    cy.main()
+    page = (tmp_path / ".work" / "cycles_sacituzumab_govitecan.html").read_text(encoding="utf-8")
+    assert "bilirubin peak 1.5 d8" in page and "creatinine peak" not in page
+    assert "Red-cell size (MCV)" in page and "Albumin (nutrition)" in page

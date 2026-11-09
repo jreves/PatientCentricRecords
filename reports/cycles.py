@@ -31,10 +31,22 @@ TESTS = {
     "PLT": ("Platelets", "×10³/µL", 150, 400, ("low", 75, 50, 25), r"PLT\b", r"x 10\^3/uL"),
     "ALT": ("ALT (liver)", "U/L", 0, 33, ("x", 3, 5, 20), r"ALT/SGPT", r"U/L"),
     "AST": ("AST (liver)", "U/L", 0, 32, ("x", 3, 5, 20), r"AST/SGOT", r"U/L"),
+    # chemistry: kidney (a rare thrombotic microangiopathy on some chemotherapy shows first as rising creatinine with
+    # falling platelets; bone-strengthening infusions are dosed by kidney function), liver, nutrition, bone. Urine and
+    # ionized values are left out.
+    "CREAT": ("Creatinine (kidney)", "mg/dL", 0, 1.1, ("x", 1.5, 3, 6), r"Creatinine\b(?!,? *(?:urine|ur\b|random))", r"mg/dL"),
+    "BILI": ("Bilirubin, total (liver)", "mg/dL", 0, 1.2, ("x", 1.5, 3, 10),
+             r"(?:Bilirubin,? total|Total bilirubin|T\.? ?Bili(?:rubin)?\b)", r"mg/dL"),
+    "ALB": ("Albumin (nutrition)", "g/dL", 3.5, 5.2, ("low", 3.0, 2.0, None), r"Albumin\b(?!,? *urine)", r"g/dL"),
+    "CALC": ("Calcium", "mg/dL", 8.6, 10.3, None, r"Calcium\b(?!,? *ion)", r"mg/dL"),
+    "MCV": ("Red-cell size (MCV)", "fL", 80, 100, None, r"MCV\b", r"fL"),
 }
 for _k, _v in C.get("cycles_tests", {}).items():
     TESTS[_k] = tuple(_v[i] if i < len(_v) and _v[i] is not None else (TESTS.get(_k) or (None,) * 7)[i] for i in range(7))
-PANELS = [["WBC", "ANC"], ["RBC"], ["HGB"], ["PLT"], ["ALT", "AST"]]
+PANELS = [["WBC", "ANC"], ["PLT"], ["HGB"], ["ALB"], ["ALT", "AST"], ["BILI"], ["CREAT"]]   # page 2; the marker panel follows
+OVERLAYS = ["ANC", "WBC", "PLT", "HGB", "ALT", "BILI", "CREAT", "ALB", "CALC", "MCV"]       # page 3, cycle over cycle
+# tests whose values sit in a narrow band far from zero: their charts are scaled around the normal range, not from 0
+RANGE_AXIS = {"ALB", "CALC", "MCV"} | set(C.get("cycles_range_axis", []))
 SHORT = {"WBC": "White cells", "ANC": "Neutrophils", "ALT": "ALT", "AST": "AST"}   # names in two-series panel titles
 BASELINE_DAYS = 3   # a lab drawn up to this many days before a day 1 (with none on day 1) is that cycle's pre-dose value
 SHOW_CYCLES = 4     # cycles shown in the calendar, overlays, summary and side effects: the latest, ending with the current one
@@ -194,6 +206,19 @@ def axis(reg, W, L, R):
     return lambda day: L + (W - L - R) * day / reg.length
 
 
+def scale(key, lo, hi, vals):
+    """(bottom, top) of a chart's value axis: from 0 for counts and enzymes, around the normal range for RANGE_AXIS tests."""
+    if key in RANGE_AXIS:
+        span = hi - lo
+        return max(0, min([lo] + vals) - 0.35 * span), max([hi] + vals) + 0.25 * span
+    return 0, max([hi * 1.15] + [v * 1.12 for v in vals])
+
+
+def out_of_range(key, v):
+    lo, hi = TESTS[key][2], TESTS[key][3]
+    return v < lo or v > hi
+
+
 def panel(reg, c, cur, keys, data, W=600, H=128):
     """One small chart: the detail cycle's values (solid) and the cycle in progress (dashed), on a day-of-cycle axis."""
     L, R, T, B = 46, 14, 26, 22
@@ -201,8 +226,8 @@ def panel(reg, c, cur, keys, data, W=600, H=128):
     series = [(k, in_cycle(reg, c, data[k]), in_cycle(reg, cur, data[k]) if cur else []) for k in keys]
     vals = [v for _, a, b in series for _, v, _ in a + b]
     lo, hi = (0, C["tumor_marker"]["uln"]) if keys[0] == "CA" else (TESTS[keys[0]][2], TESTS[keys[0]][3])
-    vmax = max([hi * 1.15] + [v * 1.12 for v in vals])
-    y = lambda v: T + (H - T - B) * (1 - v / vmax)
+    vmin, vmax = scale(keys[0], lo, hi, vals)
+    y = lambda v: T + (H - T - B) * (1 - (v - vmin) / (vmax - vmin))
     s = []
     if keys[0] == "CA":
         label = C["tumor_marker"]["name"]
@@ -222,7 +247,7 @@ def panel(reg, c, cur, keys, data, W=600, H=128):
             if t is None:
                 continue
             tv = t if g[0] == "low" else t * hi
-            if tv < vmax:
+            if vmin < tv < vmax:
                 ty = y(tv) - 2 if gi == 2 else y(tv) + 8   # grade 2 above its line, grade 3 below: close lines stay readable
                 s.append(f'<line x1="{L}" x2="{W - R}" y1="{y(tv):.1f}" y2="{y(tv):.1f}" stroke="var(--series-4)" stroke-dasharray="4 3"/>'
                          f'<text x="{W - R - 2}" y="{ty:.1f}" text-anchor="end" font-size="8" fill="var(--text-secondary)">grade {gi}</text>')
@@ -245,7 +270,7 @@ def panel(reg, c, cur, keys, data, W=600, H=128):
             s.append(f'<path d="{path}" fill="none" stroke="{col}" stroke-width="{1.2 if faint else 1.8}"{style}/>')
             for dd, v, iso in p:
                 gr = grade(k, v) if k != "CA" else (1 if v > hi else 0)
-                fill = "var(--series-2)" if gr else col
+                fill = "var(--series-2)" if gr or (k != "CA" and out_of_range(k, v)) else col
                 s.append(f'<circle cx="{x(dd):.1f}" cy="{y(v):.1f}" r="{3.4 if not faint else 2.6}" fill="{fill}"{op}>'
                          f'<title>{e(k)} {v:g} on {common.fmt(iso)}</title></circle>')
                 if not faint:   # first series labelled above its points, the second below
@@ -346,8 +371,8 @@ def overlay(reg, key, data, W=600, H=150):
     x = axis(reg, W, L, R)
     lo, hi = TESTS[key][2], TESTS[key][3]
     lines = [(c, in_cycle(reg, c, data[key])) for c in reg.shown]
-    vmax = max([hi * 1.15] + [v * 1.12 for _, p in lines for _, v, _ in p])
-    y = lambda v: T + (H - T - B) * (1 - v / vmax)
+    vmin, vmax = scale(key, lo, hi, [v for _, p in lines for _, v, _ in p])
+    y = lambda v: T + (H - T - B) * (1 - (v - vmin) / (vmax - vmin))
     s = [f'<text x="{L}" y="13" font-size="12" font-weight="650" fill="var(--text-primary)">{e(TESTS[key][0])}</text>'
          f'<text x="{W - R}" y="13" text-anchor="end" font-size="10" fill="var(--text-secondary)">{e(TESTS[key][1])}</text>',
          f'<rect x="{L}" y="{y(hi):.1f}" width="{W - L - R}" height="{y(lo) - y(hi):.1f}" fill="var(--series-1)" opacity="0.08"/>',
@@ -408,6 +433,11 @@ def summary_table(reg, data, effects):
         if alt:
             dd, v = max(alt, key=lambda t: t[1])
             lows.append(f"ALT peak {v:g} d{dd}" + (f" <b>G{grade('ALT', v)}</b>" if grade("ALT", v) else ""))
+        for k, name in (("CREAT", "creatinine"), ("BILI", "bilirubin")):   # only when high: normal values would crowd the cell
+            p = [(dd, v) for dd, v, _ in in_cycle(reg, c, data.get(k, {}))]
+            if p and max(v for _, v in p) > TESTS[k][3]:
+                dd, v = max(p, key=lambda t: t[1])
+                lows.append(f"{name} peak {v:g} d{dd}" + (f" <b>G{grade(k, v)}</b>" if grade(k, v) else ""))
         ca = in_cycle(reg, c, data["CA"])
         ca_txt = " → ".join(f"{v:g}" for _, v, _ in ca) if ca else "–"
         se = "; ".join(f"[{i + 1}]" for i, (d, _, _) in enumerate(effects) if reg.cycle_of(D(d)) is c)
@@ -415,7 +445,7 @@ def summary_table(reg, data, effects):
         rows.append(f'<tr><td class="n"><b>Cycle {c.n}</b><br>{e(common.fmt(c.start.isoformat()))} – {e(common.fmt(c.last.isoformat()))}</td>'
                     f'<td>{e(c.status())}</td><td>{e(doses)}<br><span class="m">{given} of {len(ds)} recorded as given</span></td>'
                     f'<td>{e(dose)}</td><td>{" · ".join(lows) or "–"}</td><td>{e(ca_txt)}</td><td>{se or "–"}</td></tr>')
-    return ('<table class="sum"><thead><tr><th>Cycle</th><th>Status</th><th>Doses</th><th>Dose level</th><th>Lowest counts (day), peak ALT</th>'
+    return ('<table class="sum"><thead><tr><th>Cycle</th><th>Status</th><th>Doses</th><th>Dose level</th><th>Lowest counts (day), peak ALT; creatinine or bilirubin when high</th>'
             f'<th>{e(C["tumor_marker"]["name"])}</th><th>Side effects</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
 
 
@@ -593,39 +623,42 @@ def build(r, data):
               f'{so_far}'
               '<span>vertical lines = dose days</span></div>')
     panels = "".join(f'<div>{panel(reg, c, cur, keys, data)}</div>' for keys in PANELS + [["CA"]])
-    p1 = (f'<section class="p"><h1>{e(reg.drug)}: cycle {c.n}, {common.fmt(c.start.isoformat())} – {common.fmt(c.last.isoformat())}'
-          f'{" (latest completed cycle)" if cur else ""}</h1><p class="sub">{sub}</p>{warn}{legend}'
-          f'<div class="card">{dose_strip(reg, c, cur, effects)}<div class="grid2">{panels}</div></div>'
-          f'<h2>Side effects in cycles {c.n}{" and " + str(cur.n) if cur else ""} (numbered as on the dose rows; cycles '
-          f'{reg.shown[0].n}–{reg.shown[-1].n} on the summary page)</h2>{effects_list(reg, effects, c, only=(c, cur))}</section>')
-    overlays = "".join(f"<div>{overlay(reg, k, data)}</div>" for k in ("ANC", "WBC", "PLT", "HGB", "ALT", "RBC"))
-    p2 = (f'<section class="p"><h2>{window_title(reg)}</h2>'
+    # page 1 leads with the overview: every shown cycle day by day, then the summary table
+    p1 = (f'<section class="p"><h1>{e(reg.drug)}: {window_title(reg)[0].lower() + window_title(reg)[1:]}</h1><p class="sub">{sub}</p>{warn}'
           '<p class="sub">Each row is one cycle, day by day: green = dose given, orange ✕ = not given, grey ? = not confirmed, dashed = '
           'expected; dots under a day = labs drawn; the outlined day is today.</p>'
           f'<div class="card">{calendar(reg, data)}</div>'
-          f'<h2{" class=pb" if len(reg.shown) > 8 else ""}>The same tests, cycle over cycle</h2><p class="sub">Day of cycle on the axis, one line per cycle: whether the low point '
-          'deepens, or recovery by the next day 1 slows, from one cycle to the next.</p>'
-          f'<div class="card"><div class="grid2">{overlays}</div></div></section>')
+          f'<h2{" class=pb" if len(reg.shown) > 8 else ""}>Cycle summary</h2>{summary_table(reg, data, effects)}</section>')
+    p2 = (f'<section class="p"><h2>Cycle {c.n}, {common.fmt(c.start.isoformat())} – {common.fmt(c.last.isoformat())}'
+          f'{" (latest completed cycle)" if cur else ""}{f", beside cycle {cur.n} so far" if cur else ""}</h2>{legend}'
+          f'<div class="card">{dose_strip(reg, c, cur, effects)}<div class="grid2">{panels}</div></div>'
+          f'<h2>Side effects in cycles {c.n}{" and " + str(cur.n) if cur else ""} (numbered as on the dose rows; cycles '
+          f'{reg.shown[0].n}–{reg.shown[-1].n} on the last page)</h2>{effects_list(reg, effects, c, only=(c, cur))}</section>')
+    overlays = "".join(f"<div>{overlay(reg, k, data)}</div>" for k in OVERLAYS if k in TESTS)
+    p2b = ('<section class="p"><h2>The same tests, cycle over cycle</h2><p class="sub">Day of cycle on the axis, one line per cycle: whether the low point '
+           'deepens, or recovery by the next day 1 slows, from one cycle to the next.</p>'
+           f'<div class="card"><div class="grid2">{overlays}</div></div></section>')
     logged = family_log(reg)
     log_note = ("" if r.get("symptom_log") or logged else
                 '<p class="m">No family symptom log yet. Visit notes record side effects only on visit days, so the days between '
                 'doses, when counts are lowest, are mostly blank. Each build prints a log sheet for the cycle in progress '
                 '(<code>symptom_log_…_cycleN</code>, PDF and spreadsheet); a filled-in spreadsheet put with the records is read like '
                 'any other record, and its entries appear here as family reports.</p>')
-    p3 = (f'<section class="p"><h2>Cycle summary</h2>{summary_table(reg, data, effects)}'
-          f'<h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>'
+    p3 = (f'<section class="p"><h2>Side effects, cycles {reg.shown[0].n}–{reg.shown[-1].n}</h2>'
           f'{effects_list(reg, effects, c, only=reg.shown, family=log_summaries(reg, logged))}'
           f'<div class="cols"><div><h2>Expected next</h2><ul class="x">{expected_list(reg)}</ul>{log_note}</div>'
           '<div><h2>How to read this</h2><ul class="x">'
           '<li>Grades are the Common Terminology Criteria for Adverse Events (CTCAE v5.0) cut-offs, shown for orientation; the care '
           'team decides what they mean for treatment. Liver grades assume a normal baseline.</li>'
-          '<li>Normal ranges are typical adult values matched to the lab\'s own high/low flags; the lab\'s exact ranges may differ.</li>'
+          '<li>Normal ranges are typical adult values matched to the lab\'s own high/low flags; the lab\'s exact ranges may differ. '
+          'Albumin, calcium and red-cell size (MCV) are drawn on a scale around their normal range, not from zero; a value '
+          'outside the normal range is marked even where CTCAE has no grade for it.</li>'
           '<li>Lab values come from visit-note lab tables (complete rows only, so a date is never guessed) and visit summaries. '
           'Neutrophil counts are missing where no differential was reported.</li>'
           '<li>A lab drawn up to 3 days before day 1 counts as that cycle\'s pre-dose value ("pre").</li>'
           f'<li>{"A dose is given only when an infusion record shows it." if reg.has_records else "Until infusion records are added, no dose is shown as given."}</li>'
           '</ul></div></div></section>')
-    return reg, p1 + p2 + p3
+    return reg, p1 + p2 + p2b + p3
 
 
 def main():

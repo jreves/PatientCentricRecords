@@ -220,7 +220,12 @@ score, and other entries, with their days. Nothing needs copying into the case.
 
 Lab values come from the notes' lab tables, as for `blood_counts` (a value is used only from a complete row), and
 the marker from `tumor_marker`. `cycles_tests: {KEY: [label, unit, low, high, grades, row pattern, unit pattern]}`
-overrides a test's range or its row in another lab format (`null` keeps a field). Grades are CTCAE v5.0 cut-offs.
+overrides a test's range or its row in another lab format (`null` keeps a field); set the ranges the patient's lab
+prints, e.g. `CREAT: [null, null, null, 0.9]`. The tests: white cells, neutrophils, red cells, hemoglobin, platelets,
+ALT, AST, creatinine (`CREAT`), total bilirubin (`BILI`), albumin (`ALB`), calcium (`CALC`) and red-cell size (`MCV`).
+Grades are CTCAE v5.0 cut-offs; a value outside the normal range is marked even where CTCAE has no grade (calcium,
+MCV). Albumin, calcium and MCV are charted around their normal range rather than from zero (`cycles_range_axis` adds
+other tests to that list). The summary table names creatinine or bilirubin only in a cycle where it was high.
 
 ## Citations and the source audit (`citations.yaml`)
 

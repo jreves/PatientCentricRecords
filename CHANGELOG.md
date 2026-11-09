@@ -10,6 +10,11 @@
   with side effects and a family symptom log. A scheduled dose counts as given only when an infusion record lists it.
   `python -m reports cycles --discover` proposes regimens and infusion records from the notes. The example case
   shows it with a held dose and a late cycle. It tracks the last four cycles (`show_cycles`).
+- **Cycles report, overview first:** page 1 is now every tracked cycle day by day with the cycle summary; the latest
+  completed cycle's detail follows. It now charts creatinine, total bilirubin (CTCAE grades by multiples of the upper
+  limit), albumin, calcium and red-cell size (MCV), the last three on a scale around their normal range. A value
+  outside the normal range is marked even where CTCAE has no grade. The summary names creatinine or bilirubin only in
+  a cycle where it was high. `cycles_tests` sets the patient's lab's own ranges.
 - **Cycles that start early:** a listed day 1 can start a cycle early (after a skipped dose); the cycle before ends
   the day before, and its later dose days are dropped.
 - **Family symptom log:** each cycles build writes a one-row-per-day log sheet for the cycle in progress, with dates

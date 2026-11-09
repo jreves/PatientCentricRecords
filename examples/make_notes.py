@@ -105,6 +105,12 @@ VISITS = [
      144, 80, 1, ["Ondansetron Oral 8 mg every 8 hours as needed", "Loperamide Oral 2 mg as needed", "Omeprazole Oral 20 mg daily"]),
 ]
 
+# Weekly chemistry and red-cell size for the same draws (creatinine, total bilirubin, albumin, calcium, MCV): a mild
+# bilirubin rise after some doses, albumin drifting down, MCV creeping up, as the cycles report's charts show them.
+CHEM = {"2026-08-03": (0.82, 0.6, 3.9, 9.4, 93.1), "2026-08-10": (0.85, 1.4, 3.8, 9.2, 93.6), "2026-08-17": (0.88, 0.9, 3.7, 9.1, 94.0),
+        "2026-08-24": (0.84, 0.7, 3.8, 9.3, 94.4), "2026-08-31": (0.90, 1.1, 3.6, 9.0, 95.2), "2026-09-07": (0.86, 0.8, 3.6, 8.9, 95.8),
+        "2026-09-14": (0.83, 0.6, 3.7, 9.2, 96.3), "2026-09-21": (0.87, 1.5, 3.5, 9.0, 97.0), "2026-09-28": (0.89, 0.8, 3.4, 8.7, 97.9)}
+
 # Infusion visit notes: one per dose given (the cycle 16 day 8 dose was held, so it has none).
 INFUSIONS = [("ex00000013", "2026-08-03"), ("ex00000014", "2026-08-10"), ("ex00000015", "2026-08-24"),
              ("ex00000016", "2026-09-14"), ("ex00000017", "2026-09-21")]
@@ -118,6 +124,9 @@ def table(labs):
     rows = [("WBC x 10^3/uL", 0), ("Neu # (ANC) x 10^3/uL", 1), ("HGB g/dL", 2), ("PLT x 10^3/uL", 3)]
     if all(len(labs[d]) > 4 for d in dates):
         rows += [("RBC x 10^6/uL", 4), ("ALT/SGPT U/L", 5), ("AST/SGOT U/L", 6)]
+    if all(d in CHEM for d in dates):
+        labs = {d: tuple(labs[d]) + CHEM[d] for d in dates}
+        rows += [("MCV fL", 11), ("Creatinine mg/dL", 7), ("Bilirubin, total mg/dL", 8), ("Albumin g/dL", 9), ("Calcium mg/dL", 10)]
     return "\n".join([f"LabResults {' '.join(mdy(d) for d in dates)}"] + [f"{name} {' '.join(f'{labs[d][i]:g}' for d in dates)}" for name, i in rows])
 
 

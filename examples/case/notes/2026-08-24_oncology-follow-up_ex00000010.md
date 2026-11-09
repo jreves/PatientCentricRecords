@@ -72,6 +72,11 @@ PLT x 10^3/uL 198 160 172 205
 RBC x 10^6/uL 3.85 3.7 3.8 3.9
 ALT/SGPT U/L 26 36 41 24
 AST/SGOT U/L 28 33 38 27
+MCV fL 94.4 94 93.6 93.1
+Creatinine mg/dL 0.84 0.88 0.85 0.82
+Bilirubin, total mg/dL 0.7 0.9 1.4 0.6
+Albumin g/dL 3.8 3.7 3.8 3.9
+Calcium mg/dL 9.3 9.1 9.2 9.4
 Treatment Plan:
 Sacituzumab govitecan 10 mg/kg D1,8 Q21D Cycle Length: 21 Number Cycles: 99 Start: C1D1 on 10/06/2025 Assoc Dx: metastatic breast cancer
 Plan: see the history above.

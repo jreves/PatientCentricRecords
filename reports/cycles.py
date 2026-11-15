@@ -258,6 +258,7 @@ def panel(reg, c, cur, keys, data, W=600, H=128):
     for day in range(0, reg.length + 1, 7):
         s.append(f'<text x="{x(day):.1f}" y="{H - 8}" text-anchor="middle" font-size="9" fill="var(--text-muted)">{day or "pre"}</text>')
     s.append(f'<line x1="{L}" x2="{W - R}" y1="{H - B}" y2="{H - B}" stroke="var(--grid)"/>')
+    boxes, latest = [], []   # placed labels (x, baseline, width); the cycle in progress's latest value per series
     for i, (k, pts, now) in enumerate(series):
         dash = "" if i == 0 else ' stroke-dasharray="5 3"'
         for p, faint in ((now, True), (pts, False)):
@@ -276,8 +277,25 @@ def panel(reg, c, cur, keys, data, W=600, H=128):
                 if not faint:   # first series labelled above its points, the second below
                     tag = f" G{gr}" if gr and k != "CA" else ""
                     ly = y(v) - 5 if i == 0 else y(v) + 13
+                    boxes.append((x(dd) + 5, ly, 5.6 * len(f"{v:g}{tag}")))
                     s.append(f'<text x="{x(dd) + 5:.1f}" y="{ly:.1f}" font-size="9.5" font-weight="600" fill="var(--text-primary)" '
                              f'stroke="var(--surface-1)" stroke-width="3" paint-order="stroke">{v:g}{tag}</text>')
+            if faint:
+                latest.append((i, now[-1]))
+    # "C5 84": the cycle in progress's latest value. The detail cycle's labels sit right of their points, so these go to the
+    # left where there is room (not against the value axis), each clear of the labels already placed.
+    for i, (dd, v, _) in sorted(latest, key=lambda t: y(t[1][1])):
+        txt = f"C{cur.n} {v:g}"
+        w = 5.2 * len(txt)
+        left = x(dd) - 6 - w > L + 4
+        lx, anchor = (x(dd) - 6, "end") if left else (x(dd) + 5, "start")
+        x0 = lx - w if left else lx
+        cands = [y(v) - 6, y(v) + 12, y(v) - 15, y(v) + 21, y(v) + 3] if left else [y(v) + 13, y(v) - 5, y(v) + 24, y(v) - 16]
+        clear = lambda ly: not any(px - 2 < x0 + w and x0 < px + pw + 2 and abs(ly - py) < 10.5 for px, py, pw in boxes)
+        ly = next((c for c in cands if clear(c)), cands[0])
+        boxes.append((x0, ly, w))
+        s.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="9" fill="var(--text-secondary)" stroke="var(--surface-1)" '
+                 f'stroke-width="3" paint-order="stroke">{e(txt)}</text>')
     return f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="{e(label)} through cycle {c.n}">{"".join(s)}</svg>'
 
 

@@ -14,7 +14,8 @@
   completed cycle's detail follows. It now charts creatinine, total bilirubin (CTCAE grades by multiples of the upper
   limit), albumin, calcium and red-cell size (MCV), the last three on a scale around their normal range. A value
   outside the normal range is marked even where CTCAE has no grade. The summary names creatinine or bilirubin only in
-  a cycle where it was high. `cycles_tests` sets the patient's lab's own ranges.
+  a cycle where it was high. `cycles_tests` sets the patient's lab's own ranges. Each detail chart labels the cycle in
+  progress's latest value ("C5 84"), clear of the completed cycle's labels, so a lone new result isn't just a faint dot.
 - **Cycles that start early:** a listed day 1 can start a cycle early (after a skipped dose); the cycle before ends
   the day before, and its later dose days are dropped.
 - **Family symptom log:** each cycles build writes a one-row-per-day log sheet for the cycle in progress, with dates

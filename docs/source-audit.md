@@ -26,6 +26,11 @@ The audit then runs three checks, all on your computer:
    separately: supported or not. This is a second opinion, not proof. It catches a real quote cited for the wrong
    fact, which checks 1 and 2 can't.
 
+It also checks the **tumour-marker series** (for example a spreadsheet the family keeps) against the lab results in the
+notes, date by date: each value is confirmed, differs, not found, or from before the notes' lab results begin. Days
+when the notes report two different results are listed too, with the one the series uses: that is how a lab running
+an old and a new test side by side shows up, and values either side of such a switch aren't directly comparable.
+
 ## Reading the appendix
 
 The first lines give the bottom line: how many statements are grounded, how many rest on family reports, and how

@@ -27,6 +27,47 @@ def notes():
     return common.case().notes
 
 
+# a visit-note table cell: one value, or several for the same date joined by ";" (e.g. two methods run side by side)
+CELL = re.compile(r"\d+(?:\.\d+)?(?:\s*\([LH]\))?(?:;\s*\d+(?:\.\d+)?(?:\s*\([LH]\))?)*")
+
+
+def results(pattern, unit):
+    """Every reported value of one test, keeping same-day repeats: {iso date: [(value, panel, doc id)]}.
+
+    Unlike ``parse`` (one value per date, for charts), this is for checking a series against the records: a lab that
+    runs an old and a new method on the same blood reports two values that day, under two panel names in a visit
+    summary ("<panel> | <test> | value | date") and as "a; b" in a visit-note table (panel shown as "visit-note table")."""
+    found = {}
+    for f in sorted(notes().glob("*.md")):
+        doc = f.stem.rsplit("_", 1)[-1]
+        text = f.read_text(encoding="utf-8")
+        for m in CCDA_ROW.finditer(text):
+            if re.match(pattern + r"[^\d|]*?" + ccda_unit(unit), m.group("comp")):
+                found.setdefault(m.group("date"), []).append((float(m.group("val")), m.group(0).split("|")[0].strip(), doc))
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
+            if not line.startswith("LabResults"):
+                continue
+            dates = [f"{y}-{mo}-{d}" for mo, d, y in DATE.findall(line)]
+            for row in lines[i + 1:i + 30]:
+                if row.startswith("LabResults"):
+                    break
+                m = re.match(pattern + r"[^\d]*?" + unit + r"\s+(.*)$", row)
+                cells = CELL.findall(m.group(1)) if m else []
+                if m and len(cells) == len(dates):
+                    for d, cell in zip(dates, cells):
+                        for v in re.findall(r"\d+(?:\.\d+)?(?!\d)(?=\s*(?:\([LH]\))?\s*(?:;|$))", cell):
+                            found.setdefault(d, []).append((float(v), "visit-note table", doc))
+    out = {}
+    for d, rows in found.items():   # one entry per value and day: prefer a named panel, list each note once
+        by_val = {}
+        for v, panel, doc in rows:
+            p, docs = by_val.get(v, ("", []))
+            by_val[v] = (p if p and p != "visit-note table" else panel or p, docs + [doc] if doc not in docs else docs)
+        out[d] = [(v, p or "result", sorted(docs)) for v, (p, docs) in sorted(by_val.items())]
+    return out
+
+
 def parse(tests=None):
     """{test: {iso_date: value}} plus the number of notes that contributed.
 

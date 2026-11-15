@@ -70,3 +70,21 @@ def test_manual_differential_anc(tmp_path, monkeypatch):
     monkeypatch.setattr(labs, "notes", lambda: tmp_path / "n")
     d, _ = labs.parse({"ANC": labs.DEFAULT_TESTS["ANC"]})
     assert d == {"ANC": {"2026-04-06": 1.1}}
+
+
+def test_results_keep_two_methods_on_one_day(tmp_path, monkeypatch):
+    """2026-11-15: a lab running an old and a new marker test side by side reports two values a day: under two panel
+    names in a visit summary, and as "a; b" in a visit-note table. ``labs.results`` keeps both, so a series can be
+    checked against the records."""
+    from reports import labs
+    (tmp_path / "n").mkdir()
+    (tmp_path / "n" / "2026-04-06_outpatient-visit_cd34ef56ab.md").write_text(
+        "RESULTS\nGroup | Component | Quantity | Performed\n"
+        "Marker panel | CA 15-3 U/mL | 31.5 | 2026-04-06\n"
+        "Marker Rebaseline | CA 15-3 U/mL ( 0.5 - 32.4 U/mL ) | 22.1 | 2026-04-06\n", encoding="utf-8")
+    (tmp_path / "n" / "2026-04-06_oncology-follow-up_ef56ab12cd.md").write_text(
+        "Tumor Markers\nLabResults 04/06/2026 03/16/2026\nCA 15-3 U/mL 22.1; 31.5 (H) 24.0\n", encoding="utf-8")
+    monkeypatch.setattr(labs, "notes", lambda: tmp_path / "n")
+    r = labs.results(r"CA 15-3", r"U/mL")
+    assert r["2026-03-16"] == [(24.0, "visit-note table", ["ef56ab12cd"])]
+    assert r["2026-04-06"] == [(22.1, "Marker Rebaseline", ["cd34ef56ab", "ef56ab12cd"]), (31.5, "Marker panel", ["cd34ef56ab", "ef56ab12cd"])]

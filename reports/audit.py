@@ -169,6 +169,8 @@ def event_claims():
                          f"{i.get('status', '')}", [(i["date"], False)]))
     for d, _, text in C.get("imaging", []):
         out.append(claim(f"imaging/{d}", "Imaging", f"{fmt(d)} imaging", text, [(d, False)]))
+    for ch in (C.get("tumor_marker") or {}).get("changes", []):
+        out.append(claim(f"marker/change/{ch['date']}", "Chart", ch["label"], ch["text"], [(ch["date"], False), (ch.get("end"), False)]))
     for d, approx, text in C.get("adverse_events", []):
         out.append(claim(f"ae/{d}", "Side effects", f"{fmt(d)} side effect", text, [(d, approx)]))
     return out
@@ -649,6 +651,68 @@ def derived():
     return out
 
 
+def marker_check():
+    """The tumour-marker series (e.g. a family spreadsheet) checked against the lab results in the notes, date by date.
+
+    Each value is confirmed (a note reports the same value that day), differs (notes report that day, with other values),
+    not found, or before the notes' lab results begin. Days with two different results (a lab running two methods side by
+    side) and note results missing from the series are listed too. ``tumor_marker.check`` can set the row ``pattern``
+    and ``unit`` (regular expressions); they default to the marker's name and unit."""
+    m = C.get("tumor_marker") or {}
+    if not C.marker:
+        return None
+    from . import labs
+    chk = m.get("check") or {}
+    res = labs.results(chk.get("pattern", re.escape(m["name"])), chk.get("unit", re.escape(m.get("unit", ""))))
+    first = min(res) if res else None
+    rows = []
+    for d, v in C.marker:
+        got = res.get(d, [])
+        same = [p for a, p, _ in got if abs(a - v) < 0.051]
+        status = "confirmed" if same else "differs" if got else "before" if first and d < first else "missing"
+        rows.append({"date": d, "value": v, "status": status, "matches": same,
+                     "notes": [{"value": a, "panel": p, "docs": docs} for a, p, docs in got]})
+    have = {d for d, _ in C.marker}
+    extra = [{"date": d, "notes": [{"value": a, "panel": p, "docs": docs} for a, p, docs in res[d]]} for d in sorted(set(res) - have)]
+    return {"name": m["name"], "unit": m.get("unit", ""), "first_note": first, "rows": rows, "extra": extra,
+            "two": [r["date"] for r in rows if len(r["notes"]) > 1]}
+
+
+def marker_summary(mc):
+    n = {s: sum(r["status"] == s for r in mc["rows"]) for s in ("confirmed", "differs", "missing", "before")}
+    s = (f"{mc['name']}: {len(mc['rows'])} values checked against the notes' lab results: {n['confirmed']} confirmed, "
+         f"{n['differs']} differ, {n['missing']} not found")
+    if not mc["first_note"]:
+        s += " (the notes report no results for it)"
+    if n["before"]:
+        s += f", {n['before']} from before the notes' lab results begin ({fmt(mc['first_note'])})"
+    if mc["two"]:
+        s += f"; {len(mc['two'])} days with two different results (two test methods?)"
+    if mc["extra"]:
+        s += f"; {len(mc['extra'])} note results not in the series"
+    return s
+
+
+def marker_html(mc):
+    if not mc:
+        return ""
+    lab = lambda ns: "; ".join(f'{x["value"]:g} ({e(x["panel"])}, note {e(", ".join(x["docs"][:2]))}{"…" if len(x["docs"]) > 2 else ""})' for x in ns)
+    word = {"differs": '<b class="bad">differs</b>', "missing": '<b class="bad">not in the notes</b>',
+            "confirmed": "confirmed", "before": "before the notes' lab results"}
+    rows = [r for r in mc["rows"] if r["status"] in ("differs", "missing") or len(r["notes"]) > 1]
+    body = "".join(f'<tr><td>{e(fmt(r["date"]))}</td><td>{r["value"]:g}</td><td>{word[r["status"]]}'
+                   + (f' (matches {e(", ".join(r["matches"]))})' if r["matches"] and len(r["notes"]) > 1 else "")
+                   + f'</td><td>{lab(r["notes"]) or "—"}</td></tr>' for r in rows)
+    body += "".join(f'<tr><td>{e(fmt(x["date"]))}</td><td>—</td><td><b class="bad">not in the series</b></td><td>{lab(x["notes"])}</td></tr>'
+                    for x in mc["extra"])
+    before = [fmt(r["date"]) for r in mc["rows"] if r["status"] == "before"]
+    return (f'<h2>{e(mc["name"])} values checked against the lab results in the notes</h2><p class="sub">{e(marker_summary(mc))}.'
+            + (f' Before the notes\' lab results: {e(", ".join(before))}.' if before else "")
+            + ' Listed below: values that differ or are not in the notes, and days the notes report two different results.</p>'
+            + (f'<table><thead><tr><th style="width:10%">Date</th><th style="width:10%">Series value</th><th style="width:22%">Check</th>'
+               f'<th>Results in the notes (panel, note)</th></tr></thead><tbody>{body}</tbody></table>' if body else ""))
+
+
 AREA_ORDER = ["Treatments", "Treatments table", "Doses", "Chemotherapy cycles", "Side effects", "Pathology", "Imaging", "Events", "Implants", "Disease sites",
               "Treatment lines", "Medications", "Emergency summary", "Open questions", "Chart", "Narrative"]
 STATUS = {"broken": ("Citation problem", "#b42318"), "partial": ("Partly grounded", "#b54708"), "unsourced": ("No source yet", "#6b7280"),
@@ -667,6 +731,11 @@ def run(semantic=True, log=print):
     stale = sorted(set(sources) - {c["key"] for c in claims})
     out = {"built": C.built, "notes": len(docs), "claims": results, "stale_keys": stale, "derived": derived(),
            "semantic_model": sem.model if sem else None, "semantic_ran": bool(sem and (sem.calls or sem.hits))}
+    try:
+        out["marker_check"] = marker_check()
+    except Exception as ex:   # a check, not a gate: say it didn't run (without echoing note text)
+        out["marker_check"] = None
+        log(f"source audit: tumour-marker check not run ({type(ex).__name__})")
     (common.work_dir() / "source_audit.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     counts = {s: sum(r["status"] == s for r in results) for s in ORDER}
     log(f"source audit: {len(results)} claims: " + ", ".join(f"{n} {STATUS[s][0].lower()}" for s, n in counts.items()))
@@ -677,6 +746,8 @@ def run(semantic=True, log=print):
             + f"; {sem.calls} new checks, {sem.hits} cached" + (f", {sem.bad} unreadable answers" if sem.bad else ""))
     if stale:
         log(f"source audit: {len(stale)} entries in citations.yaml match no claim (renamed or removed)")
+    if out["marker_check"]:
+        log("source audit, " + marker_summary(out["marker_check"]))
     return out
 
 
@@ -751,6 +822,7 @@ date, dose, drug or test name and clinician named in the statement appears in th
 opinion, not proof; "Family report" marks what the family supplied that the records do not contain.</p>
 <p><b>How to read it.</b> Items that need attention come first (citation problems, details not found, statements without a source yet),
 then family reports, then grounded statements.{auth_html} Values the reports compute directly from the notes:</p><ul>{derived_html}</ul></div>
+{marker_html(out.get("marker_check"))}
 {"".join(body)}</div></div></body></html>"""
     return common.write_and_print("source_audit", doc, f"source_audit_{C.built}.pdf")
 

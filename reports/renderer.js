@@ -184,6 +184,18 @@
       }
       el("line", { x1: L, x2: L + plotW, y1: yv(line.uln), y2: yv(line.uln), stroke: css("--text-muted"), "stroke-dasharray": "5 4" }, g);
       const ul = el("text", { x: L - 6, y: yv(line.uln) + 4, "text-anchor": "end", "font-size": 11, fill: css("--text-muted") }); ul.textContent = `ULN ${line.uln}`;
+      for (const ch of line.changes || []) {   // a change in how the marker is measured: values either side aren't directly comparable
+        if (!inRange(ch.date) && !(ch.end && inRange(ch.end))) continue;
+        const x0 = Math.max(L, x(ch.date)), x1 = ch.end ? Math.min(L + plotW, x(ch.end)) : x0;
+        if (x1 > x0) el("rect", { x: x0, y: lineTop, width: x1 - x0, height: lineH, fill: css("--series-4"), opacity: 0.12 }, g);
+        el("line", { x1: x0, x2: x0, y1: lineTop, y2: lineBottom, stroke: css("--series-4"), "stroke-width": 1.2, "stroke-dasharray": "3 3" }, g);
+        const right = x0 < L + plotW - 160;
+        const t = el("text", { x: right ? x0 + 5 : x0 - 5, y: lineTop + 12, "text-anchor": right ? "start" : "end", "font-size": 10.5, fill: css("--text-secondary"),
+                               stroke: surf, "stroke-width": 3, "paint-order": "stroke" }, g);
+        t.textContent = ch.label;
+      }
+      const changeNote = d => (line.changes || []).filter(ch => d >= ch.date && d <= (ch.end || ch.date))
+        .map(ch => `<br><b>${esc(ch.label)}:</b> ${esc(ch.text)}`).join("");
       const pts = line.points.map(([d, v, ctx]) => [x(d), yv(v), d, v, ctx]);
       el("path", { d: pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(""), fill: "none", stroke: ink, "stroke-width": 2, "stroke-linejoin": "round" }, g);
       for (const p of pts) el("circle", { cx: p[0], cy: p[1], r: 2.2, fill: ink }, g);
@@ -197,7 +209,7 @@
         cross.setAttribute("x1", best[0]); cross.setAttribute("x2", best[0]); cross.setAttribute("visibility", "visible");
         dot.setAttribute("cx", best[0]); dot.setAttribute("cy", best[1]); dot.setAttribute("visibility", "visible");
         const chg = prev ? `<br>${best[3] > prev[3] ? "↑ +" : best[3] < prev[3] ? "↓ " : "→ "}${(best[3] - prev[3]).toFixed(1)} since ${fmt(prev[2])} (${prev[3]})` : "";
-        tip.show(`<b>${esc(line.label)}: ${best[3]} ${esc(line.unit)}</b><span class="when">${fmt(best[2])}${best[3] > line.uln ? " · above normal" : ""}</span>${chg}${best[4] ? "<br>On: " + esc(best[4]) : ""}`, ev);
+        tip.show(`<b>${esc(line.label)}: ${best[3]} ${esc(line.unit)}</b><span class="when">${fmt(best[2])}${best[3] > line.uln ? " · above normal" : ""}</span>${chg}${best[4] ? "<br>On: " + esc(best[4]) : ""}${changeNote(best[2])}`, ev);
       });
       ov.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.hide(); });
       if (ann) {   // print: write the first, highest and latest values on the line

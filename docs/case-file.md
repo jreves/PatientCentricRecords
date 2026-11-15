@@ -45,6 +45,11 @@ tumor_marker:                 # the marker line under the timeline, and marker c
   values: [[2021-03-10, 96], ...]
   # or read them from a published spreadsheet note:
   # source: {glob: "*_spreadsheet_*.md", pattern: '^\| (\d{4}-\d{2}-\d{2}) \| ([\d.]+) \|'}
+  # the source audit checks every value against the lab results in the notes; set the row label and unit
+  # (regular expressions) if they differ from name and unit:
+  # check: {pattern: 'CA 27\.29', unit: 'U/mL'}
+  changes:                    # a change in how the marker is measured: shaded on the marker line, explained on hover
+  - {date: 2024-03-04, end: 2024-04-15, label: CA 27-29 test change, text: "Two results per draw while the lab switched tests ..."}
 
 texts: {note: "...", treatments_sub: "...", ...}
 ```

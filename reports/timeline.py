@@ -143,7 +143,8 @@ def build_oncology(spec):
     m = C()["tumor_marker"]
     return dict(id=spec["id"], aria=spec["aria"], ranges=spec["ranges"], defaultRange=spec["defaultRange"], lanes=spec["lanes"], bars=bars,
                 markers=markers, guides=guides(spec.get("guide_kinds", [])), today=C().today,
-                line=dict(title=f"{m['name']} ({m['unit']})", label=m["name"], unit=m["unit"], uln=m["uln"], points=ca_points()), cls=spec["cls"])
+                line=dict(title=f"{m['name']} ({m['unit']})", label=m["name"], unit=m["unit"], uln=m["uln"], points=ca_points(),
+                          changes=m.get("changes", [])), cls=spec["cls"])
 
 
 def build_hospital(spec):

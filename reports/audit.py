@@ -447,12 +447,35 @@ def verdict(answer):
 
 
 NOTE_BUDGET, TOTAL_BUDGET = 4500, 13000   # characters of record text shown to the model per note, and in all
+CTX, ANSWER = 8192, 2400   # the model's context window (num_ctx), and the most it may write (the retry's num_predict)
+
+
+def est_tokens(t):
+    """A conservative token count for the local model: its tokenizer splits numbers into single digits, so lab tables
+    cost about three times as much as prose per character. Calibrated against Ollama's counts (2026-11-15)."""
+    return 1.15 * (len(re.findall(r"\d", t)) + len(re.findall(r"[|()\[\]/:;,.\-–]", t)) + 1.3 * len(re.findall(r"[A-Za-z]+", t))
+                   + 0.5 * len(re.findall(r"[^\x00-\x7f]", t)))
 
 
 def evidence(c, docs, srcs, atom_list, family=()):
-    """What the model reads: a short note whole; a long one as passages around the quote, each detail, each number and
-    each content word of the claim. Then the family's reports, which count as support for what they state."""
-    budget = max(1500, min(NOTE_BUDGET, TOTAL_BUDGET // max(1, len(srcs))))
+    """What the model reads, sized to fit its context with room for the answer (number-dense notes are cut shorter)."""
+    room = CTX - ANSWER - 300 - est_tokens(SEM_PROMPT.format(claim=c["text"], evidence=""))
+    # every cited note gets a share (a statement citing 20 notes sees a passage of each, not the first eight in full)
+    budget = max(400, min(NOTE_BUDGET, TOTAL_BUDGET // max(1, len(srcs))))
+    total = TOTAL_BUDGET
+    for _ in range(6):
+        out = _evidence(c, docs, srcs, atom_list, family, budget, total)
+        t = est_tokens(out)
+        if t <= room:
+            break
+        f = max(0.3, room / t * 0.95)
+        budget, total = max(300, int(budget * f)), int(min(total, len(out)) * f)
+    return out
+
+
+def _evidence(c, docs, srcs, atom_list, family, budget, total):
+    """A short note whole; a long one as passages around the quote, each detail, each number and each content word of
+    the claim. Then the family's reports, which count as support for what they state."""
     words = sorted(content_words(c["text"]), key=len, reverse=True)[:25]
     numbers = set(re.findall(r"(?<![\d.])\d+(?:\.\d+)?(?![\d])", strip_html(c["text"])))
     parts = []
@@ -484,7 +507,7 @@ def evidence(c, docs, srcs, atom_list, family=()):
         tag = f", AUTHORITATIVE for {auth['covers']} as of {fmt(str(auth['as_of']))}" if auth else ""
         parts.append(f"[note {doc['id']}, {doc['date'] or 'undated'}, {doc['type']}, clinic: {doc['clinic'] or 'unknown'}, "
                      f"source: {src.group(1) if src else 'unknown'}{tag}] {excerpt}")
-    out = "\n\n".join(parts)[:TOTAL_BUDGET]
+    out = "\n\n".join(parts)[:total]
     if family:
         out += "\n\nFAMILY REPORTS (the family's own knowledge; they count as support for what they state):\n" + "\n".join(f"- {f}" for f in family)
     return out
@@ -525,7 +548,7 @@ class Semantic:
         if not self.ok:
             return None
         body = {"model": self.model, "stream": False, "think": False, "format": SEM_SCHEMA,
-                "messages": [{"role": "user", "content": prompt}], "options": {"temperature": 0, "num_ctx": 8192, "num_predict": 1200}}
+                "messages": [{"role": "user", "content": prompt}], "options": {"temperature": 0, "num_ctx": CTX, "num_predict": 1200}}
         out = None
         for attempt in range(2):   # a malformed answer (e.g. JSON cut off) is retried once, with more room
             raw = self._ask(body)
@@ -536,7 +559,7 @@ class Semantic:
                 out = json.loads(raw)
                 break
             except ValueError:
-                body["options"]["num_predict"] = 2400
+                body["options"]["num_predict"] = ANSWER
         self.calls += 1
         if out is None:   # cached too, so reruns don't re-ask; a changed claim or citation gets a fresh check
             self.bad += 1

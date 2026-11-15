@@ -50,6 +50,10 @@
     later ">".
   - A document made only of scanned pages no longer breaks a run; the log names its source.
   - Unreadable model answers are cached, so audits don't re-ask.
+  - The source audit sizes the evidence it shows the local model in estimated tokens, with room for the answer.
+    Number-dense notes (lab tables, a marker spreadsheet) had overflowed the model's context within the character
+    budget, so prompts were cut and some answers came back unreadable. A statement citing many notes now shows a
+    passage from each, rather than only the first few.
   - The vitals subtitle no longer says "rose to a peak" when the first weight is the peak.
 
 ## 0.9.0 (continued, before the first push)

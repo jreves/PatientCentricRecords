@@ -117,3 +117,21 @@ def test_local_model_trouble_is_named_and_retried(audit, monkeypatch):
     assert sem._ask({}) is None and sem.problem == "Ollama answered HTTP 400: unknown option", "a bad request isn't retried"
     replies[:] = [urllib.error.URLError(ConnectionRefusedError("refused"))] * 3
     assert sem._ask({}) is None and sem.problem.startswith("Ollama not reachable at http://localhost:11434")
+
+
+def test_number_dense_evidence_fits_the_model_context(audit):
+    """Regression (2026-11-15): the local model's tokenizer splits numbers into digits, so a lab table or marker
+    spreadsheet within the character budget overflowed the 8,192-token context; Ollama cut the prompt and the answer
+    came back unreadable. The evidence is now sized in estimated tokens, with room for the answer; prose is unchanged."""
+    rows = "\n".join(f"2025-{m:02}-{d:02} | {40 + m + d / 10:.1f} | 0.5 | 32.4" for m in range(1, 13) for d in range(1, 29))
+    docs = {f"n{i}": note(audit, f"n{i}", f"MARKER HISTORY\n{rows}") for i in range(4)}
+    c = audit.claim("x/1", "Open questions", "Marker", "The marker rose from 41.1 on 1/1/2025 to 64.8 on 12/28/2025.")
+    srcs = [{"doc": f"n{i}", "quote": "2025-01-01 | 41.1"} for i in range(4)]
+    ev = audit.evidence(c, docs, srcs, audit.atoms(c))
+    prompt = audit.SEM_PROMPT.format(claim=c["text"], evidence=ev)
+    assert audit.est_tokens(prompt) <= audit.CTX - audit.ANSWER
+    assert len(ev) < audit.TOTAL_BUDGET
+    prose = {"p": note(audit, "p", "The patient was seen in clinic today and is doing well. " * 20)}
+    c2 = audit.claim("x/2", "Narrative", "Visit", "She was seen in clinic and is doing well.")
+    assert audit.evidence(c2, prose, [{"doc": "p", "quote": "doing well"}], audit.atoms(c2)) == \
+        audit._evidence(c2, prose, [{"doc": "p", "quote": "doing well"}], audit.atoms(c2), (), audit.NOTE_BUDGET, audit.TOTAL_BUDGET)

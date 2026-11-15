@@ -56,3 +56,17 @@ def test_example_timeline_page(example, tmp_path):
     timeline.build_pages(cfgs)
     page = (tmp_path / "cancer_timeline.html").read_text(encoding="utf-8")
     assert "Sacituzumab govitecan" in page and "Patient identifiers removed" in page
+
+
+def test_manual_differential_anc(tmp_path, monkeypatch):
+    """2026-11-15: a manual differential labels neutrophils "ANC (M)", not "Neu # (ANC)"; both are read. A row
+    such as "LY# (M)" is not."""
+    from reports import labs
+    (tmp_path / "n").mkdir()
+    (tmp_path / "n" / "2026-04-06_outpatient-visit_cd34ef56ab.md").write_text(
+        "RESULTS\nGroup | Component | Quantity | Performed\n"
+        "Manual differential | LY# (M) 10^3/uL ( 1.2 - 3.4 10^3/uL ) | 0.9 | 2026-04-06\n"
+        "Manual differential | ANC (M) 10^3/uL ( 1.5 - 6.5 10^3/uL ) | 1.1 | 2026-04-06\n", encoding="utf-8")
+    monkeypatch.setattr(labs, "notes", lambda: tmp_path / "n")
+    d, _ = labs.parse({"ANC": labs.DEFAULT_TESTS["ANC"]})
+    assert d == {"ANC": {"2026-04-06": 1.1}}

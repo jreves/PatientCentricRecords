@@ -38,6 +38,8 @@
   catalog numbers (they name the product, not the patient's device), including unlabelled repeats in an implant log.
   Serial and lot numbers are still redacted; "Lot no." is now an ID label.
 - **Fixes:**
+  - Neutrophils from a manual differential (labelled "ANC (M)") are read alongside the automated count, in the blood
+    counts and cycles reports.
   - "female" and "male" are medical terms, so a stray registry entry can't redact them as a name.
   - The source audit no longer strips "<...>" from note text, which had deleted text between a lab range's "<" and a
     later ">".

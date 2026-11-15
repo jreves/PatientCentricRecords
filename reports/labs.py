@@ -11,7 +11,7 @@ import re
 
 from . import common
 
-DEFAULT_TESTS = {"WBC": r"WBC\b", "ANC": r"Neu # \(ANC\)", "HGB": r"HGB\b", "PLT": r"PLT\b"}
+DEFAULT_TESTS = {"WBC": r"WBC\b", "ANC": r"(?:Neu # \(ANC\)|\bANC \(M\))", "HGB": r"HGB\b", "PLT": r"PLT\b"}
 DATE = re.compile(r"\b(\d{2})/(\d{2})/(\d{4})\b")
 VAL = re.compile(r"(\d+(?:\.\d+)?)(?:\s*\((?:L|H)\))?")
 # a C-CDA result row: panel | component (with its unit and range) | value | date

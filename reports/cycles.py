@@ -25,7 +25,7 @@ C = common.case()
 # limit for raised liver enzymes. Ranges and row patterns can be overridden in the case (cycles_tests).
 TESTS = {
     "WBC": ("White blood cells", "×10³/µL", 4.5, 11.0, ("low", 3.0, 2.0, 1.0), r"WBC\b", r"x 10\^3/uL"),
-    "ANC": ("Neutrophils (ANC)", "×10³/µL", 1.5, 7.5, ("low", 1.5, 1.0, 0.5), r"Neu # \(ANC\)", r"x 10\^3/uL"),
+    "ANC": ("Neutrophils (ANC)", "×10³/µL", 1.5, 7.5, ("low", 1.5, 1.0, 0.5), r"(?:Neu # \(ANC\)|\bANC \(M\))", r"x 10\^3/uL"),
     "RBC": ("Red blood cells", "×10⁶/µL", 4.2, 5.4, None, r"RBC\b", r"x 10\^6/uL"),
     "HGB": ("Hemoglobin", "g/dL", 12.0, 15.5, ("low", 10.0, 8.0, None), r"HGB\b", r"g/dL"),
     "PLT": ("Platelets", "×10³/µL", 150, 400, ("low", 75, 50, 25), r"PLT\b", r"x 10\^3/uL"),
